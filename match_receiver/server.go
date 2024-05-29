@@ -13,13 +13,13 @@ import (
 const buffer_size = 1028
 
 type Server struct {
-	conn *websocket.Conn
-	svc  Service
+	conn     *websocket.Conn
+	producer Producer
 }
 
-func NewSever(svc Service) *Server {
+func NewServer(producer Producer) *Server {
 	return &Server{
-		svc: svc,
+		producer: producer,
 	}
 }
 func (s *Server) Start() error {
@@ -48,7 +48,7 @@ func (s *Server) readLoop() {
 			log.Fatal(err)
 			continue
 		}
-		if err := s.svc.SendData(context.Background(), matches); err != nil {
+		if err := s.producer.ProduceData(context.Background(), matches); err != nil {
 			log.Fatal(err)
 			continue
 		}

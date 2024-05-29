@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	FetchLiveMatches(context.Context) ([]*types.Match, error)
+	FetchMatches(context.Context) ([]*types.Match, error)
 }
 
 type basicService struct {
@@ -22,7 +22,7 @@ func New(fetcher Fetcher, processor Processor) Service {
 	}
 }
 
-func (svc *basicService) FetchLiveMatches(ctx context.Context) ([]*types.Match, error) {
+func (svc *basicService) FetchMatches(ctx context.Context) ([]*types.Match, error) {
 	res, err := svc.fetcher.FetchData()
 	if err != nil {
 		return nil, err

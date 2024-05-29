@@ -7,6 +7,8 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -16,6 +18,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const queue_url_env = "QUEUE_URL"
+
 func main() {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
@@ -24,6 +28,7 @@ func main() {
 	var (
 		client      = sqs.NewFromConfig(cfg)
 		svc         = service.New()
+		consumer    = transport.NewSQSConsumer(client, os.Getenv(queue_url_env), svc)
 		endpoints   = matchendpoint.New(svc)
 		httpHandler = transport.NewHTTPHandler(endpoints)
 	)
@@ -39,8 +44,17 @@ func main() {
 			panic(err)
 		}
 	}()
-	transport.NewSQSConsumer(client, os.Getenv("QUEUE_URL"), svc)
-	select {}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go consumer.Start(ctx)
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	<-stop
+
+	consumer.Stop(ctx)
 }
 
 func init() {

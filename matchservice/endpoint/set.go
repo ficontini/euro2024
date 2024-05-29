@@ -6,7 +6,9 @@ import (
 
 	"github.com/ficontini/euro2024/matchservice/service"
 	"github.com/ficontini/euro2024/types"
+	"github.com/go-kit/kit/circuitbreaker"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/sony/gobreaker"
 )
 
 type Set struct {
@@ -15,9 +17,19 @@ type Set struct {
 }
 
 func New(svc service.Service) Set {
+	var (
+		upcomingEndpoint endpoint.Endpoint
+		liveEndpoint     endpoint.Endpoint
+	)
+	{
+		upcomingEndpoint = makeGetUpcomingMatchesEndpoint(svc)
+		upcomingEndpoint = circuitbreaker.Gobreaker(gobreaker.NewCircuitBreaker(gobreaker.Settings{}))(upcomingEndpoint)
+		liveEndpoint = makeGetLiveMatchesEndpoint(svc)
+		liveEndpoint = circuitbreaker.Gobreaker(gobreaker.NewCircuitBreaker(gobreaker.Settings{}))(liveEndpoint)
+	}
 	return Set{
-		GetUpcomingMatchesEndpoint: makeGetUpcomingMatchesEndpoint(svc),
-		GetLiveMatchesEndpoint:     makeGetLiveMatchesEndpoint(svc),
+		GetUpcomingMatchesEndpoint: upcomingEndpoint,
+		GetLiveMatchesEndpoint:     liveEndpoint,
 	}
 }
 func makeGetLiveMatchesEndpoint(svc service.Service) endpoint.Endpoint {
