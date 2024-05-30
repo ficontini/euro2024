@@ -32,6 +32,7 @@ func main() {
 		endpoints   = matchendpoint.New(svc)
 		httpHandler = transport.NewHTTPHandler(endpoints)
 	)
+
 	go func() {
 		httpListener, err := net.Listen("tcp", ":3003")
 		if err != nil {
@@ -47,14 +48,14 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go consumer.Start(ctx)
-
+	consumer.Start(ctx)
 	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
 	<-stop
 
 	consumer.Stop(ctx)
+
 }
 
 func init() {

@@ -7,4 +7,5 @@ receiver:
 match:
 	@go build -o bin/match ./matchservice
 	@./bin/match
-.PHONY: fetcher receiver match
+
+.PHONY: fetcher receiver match build 

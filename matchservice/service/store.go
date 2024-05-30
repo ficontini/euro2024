@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/ficontini/euro2024/types"
 )
@@ -11,6 +12,7 @@ type Store interface {
 	Add(context.Context, *types.Match) error
 	Get(context.Context) ([]*types.Match, error)
 	Clean(context.Context) error
+	FakeData(context.Context)
 }
 
 type InMemoryStore struct {
@@ -53,4 +55,10 @@ func (s *InMemoryStore) Clean(_ context.Context) error {
 	s.matchesByTeam = make(map[string][]*types.Match)
 
 	return nil
+}
+
+func (s *InMemoryStore) FakeData(ctx context.Context) {
+	s.Add(ctx, types.NewMatch(time.Now(), types.NewLocation("Münich", "Allianz Arena"), "Germany", "Scotland", types.NS, types.NewResult(0, 0)))
+	s.Add(ctx, types.NewMatch(time.Now(), types.NewLocation("Berlin", "Olympiastadion Berlin"), "Spain", "Croatia", types.NS, types.NewResult(0, 0)))
+	s.Add(ctx, types.NewMatch(time.Now(), types.NewLocation("MHP Arena", "Sttutgart"), "Slovenia", "Denmark", types.NS, types.NewResult(0, 0)))
 }

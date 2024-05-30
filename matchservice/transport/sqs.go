@@ -36,9 +36,8 @@ func NewSQSConsumer(client *sqs.Client, queueURL string, service service.Service
 }
 func (c *sqsConsumer) Start(ctx context.Context) {
 	c.wg.Add(1)
-
+	defer c.wg.Done()
 	go func() {
-		defer c.wg.Done()
 		for {
 			select {
 			case <-c.stopch:

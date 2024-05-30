@@ -16,6 +16,49 @@ type Set struct {
 	GetLiveMatchesEndpoint     endpoint.Endpoint
 }
 
+func (s Set) GetUpcomingMatches(ctx context.Context) ([]*types.Match, error) {
+	resp, err := s.GetUpcomingMatchesEndpoint(ctx, struct{}{})
+	if err != nil {
+		return nil, err
+	}
+	response := resp.(MatchResponse)
+	var matches []*types.Match
+	for _, m := range response.Matches {
+		matches = append(matches, types.NewMatch(
+			m.Date,
+			types.NewLocation(m.Location.City, m.Location.Stadium),
+			m.Home.Team,
+			m.Away.Team,
+			m.Status,
+			types.NewResult(
+				m.Home.Goals,
+				m.Away.Goals,
+			)))
+	}
+	return matches, nil
+}
+func (s Set) GetLiveMatches(ctx context.Context) ([]*types.Match, error) {
+	resp, err := s.GetLiveMatchesEndpoint(ctx, struct{}{})
+	if err != nil {
+		return nil, err
+	}
+	response := resp.(MatchResponse)
+	var matches []*types.Match
+	for _, m := range response.Matches {
+		matches = append(matches, types.NewMatch(
+			m.Date,
+			types.NewLocation(m.Location.City, m.Location.Stadium),
+			m.Home.Team,
+			m.Away.Team,
+			m.Status,
+			types.NewResult(
+				m.Home.Goals,
+				m.Away.Goals,
+			)))
+	}
+	return matches, nil
+}
+
 func New(svc service.Service) Set {
 	var (
 		upcomingEndpoint endpoint.Endpoint
@@ -62,6 +105,7 @@ func makeResponse(matches []*types.Match) MatchResponse {
 				match.Location.Stadium,
 				match.Location.City,
 			},
+			Status: match.Status,
 			Home: Team{
 				Team:  match.Home,
 				Goals: match.Result.Home,
@@ -81,10 +125,11 @@ type MatchResponse struct {
 	Matches []Match `json:"matches"`
 }
 type Match struct {
-	Home     Team      `json:"home"`
-	Away     Team      `json:"away"`
-	Date     time.Time `json:"date"`
-	Location Location  `json:"location"`
+	Home     Team              `json:"home"`
+	Away     Team              `json:"away"`
+	Date     time.Time         `json:"date"`
+	Status   types.MatchStatus `json:"-"`
+	Location Location          `json:"location"`
 }
 
 type Location struct {
