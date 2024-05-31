@@ -15,15 +15,23 @@ import (
 
 type grpcServer struct {
 	getUpcoming grpctransport.Handler
+	getLive grpctransport.Handler
 	proto.UnimplementedMatchesServer
 }
 
-func (s *grpcServer) GetUpcoming(ctx context.Context, req *proto.UpcomingRequest) (*proto.UpcomingResponse, error) {
+func (s *grpcServer) GetUpcoming(ctx context.Context, req *proto.MatchRequest) (*proto.MatchResponse, error) {
 	_, rep, err := s.getUpcoming.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return rep.(*proto.UpcomingResponse), nil
+	return rep.(*proto.MatchResponse), nil
+}
+func (s *grpcServer) GetLive(ctx context.Context, req *proto.MatchRequest) (*proto.MatchResponse, error){
+	_, rep; err := s.getLive.ServeGRPC(ctx, req)
+	if err != nil{
+		return nil, err
+	}
+	return rep.(*proto.MatchResponse), nil 
 }
 
 func NewGRPCServer(endpoints matchendpoint.Set) proto.MatchesServer {
@@ -35,26 +43,43 @@ func NewGRPCServer(endpoints matchendpoint.Set) proto.MatchesServer {
 			encodeGRPCResp,
 			options...,
 		),
+		getLive: grpctransport.NewServer(
+			endpoints.GetLiveMatchesEndpoint,
+			decodeGRPCReq,
+			encodeGRPCResp,
+			options...
+		),
 	}
 }
 func NewGRPCClient(conn *grpc.ClientConn) service.Service {
 	var (
 		options     = []grpctransport.ClientOption{}
-		getEndpoint endpoint.Endpoint
+		getUpcomingEndpoint endpoint.Endpoint
+		getLiveEndpoint endpoint.Endpoint
 	)
 	{
-		getEndpoint = grpctransport.NewClient(
+		getUpcomingEndpoint = grpctransport.NewClient(
 			conn,
 			"Matches",
 			"GetUpcoming",
 			encodeGRPRequest,
 			decodeGRPResponse,
-			proto.UpcomingResponse{},
+			proto.MatchResponse{},
+			options...,
+		).Endpoint()
+		getLiveEndpoint = grpctransport.NewClient(
+			conn,
+			"Matches",
+			"GetLive",
+			encodeGRPRequest,
+			decodeGRPResponse,
+			proto.MatchResponse{},
 			options...,
 		).Endpoint()
 	}
 	return matchendpoint.Set{
-		GetUpcomingMatchesEndpoint: getEndpoint,
+		GetUpcomingMatchesEndpoint: getUpcomingEndpoint,
+		GetLiveMatchesEndpoint: getLiveEndpoint,
 	}
 
 }
@@ -85,17 +110,17 @@ func encodeGRPCResp(_ context.Context, resp interface{}) (interface{}, error) {
 				},
 			})
 	}
-	return &proto.UpcomingResponse{
+	return &proto.MatchResponse{
 		Matches: matches,
 	}, nil
 }
 
 func encodeGRPRequest(context.Context, interface{}) (request interface{}, err error) {
-	return &proto.UpcomingRequest{}, nil
+	return &proto.MatchRequest{}, nil
 }
 
 func decodeGRPResponse(_ context.Context, resp interface{}) (interface{}, error) {
-	response := resp.(*proto.UpcomingResponse)
+	response := resp.(*proto.MatchResponse)
 	var matches []matchendpoint.Match
 	for _, m := range response.Matches {
 		matches = append(matches,

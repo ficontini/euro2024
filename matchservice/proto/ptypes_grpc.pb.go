@@ -22,7 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MatchesClient interface {
-	GetUpcoming(ctx context.Context, in *UpcomingRequest, opts ...grpc.CallOption) (*UpcomingResponse, error)
+	GetUpcoming(ctx context.Context, in *MatchRequest, opts ...grpc.CallOption) (*MatchResponse, error)
+	GetLive(ctx context.Context, in *MatchRequest, opts ...grpc.CallOption) (*MatchResponse, error)
 }
 
 type matchesClient struct {
@@ -33,9 +34,18 @@ func NewMatchesClient(cc grpc.ClientConnInterface) MatchesClient {
 	return &matchesClient{cc}
 }
 
-func (c *matchesClient) GetUpcoming(ctx context.Context, in *UpcomingRequest, opts ...grpc.CallOption) (*UpcomingResponse, error) {
-	out := new(UpcomingResponse)
+func (c *matchesClient) GetUpcoming(ctx context.Context, in *MatchRequest, opts ...grpc.CallOption) (*MatchResponse, error) {
+	out := new(MatchResponse)
 	err := c.cc.Invoke(ctx, "/Matches/GetUpcoming", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *matchesClient) GetLive(ctx context.Context, in *MatchRequest, opts ...grpc.CallOption) (*MatchResponse, error) {
+	out := new(MatchResponse)
+	err := c.cc.Invoke(ctx, "/Matches/GetLive", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +56,8 @@ func (c *matchesClient) GetUpcoming(ctx context.Context, in *UpcomingRequest, op
 // All implementations must embed UnimplementedMatchesServer
 // for forward compatibility
 type MatchesServer interface {
-	GetUpcoming(context.Context, *UpcomingRequest) (*UpcomingResponse, error)
+	GetUpcoming(context.Context, *MatchRequest) (*MatchResponse, error)
+	GetLive(context.Context, *MatchRequest) (*MatchResponse, error)
 	mustEmbedUnimplementedMatchesServer()
 }
 
@@ -54,8 +65,11 @@ type MatchesServer interface {
 type UnimplementedMatchesServer struct {
 }
 
-func (UnimplementedMatchesServer) GetUpcoming(context.Context, *UpcomingRequest) (*UpcomingResponse, error) {
+func (UnimplementedMatchesServer) GetUpcoming(context.Context, *MatchRequest) (*MatchResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUpcoming not implemented")
+}
+func (UnimplementedMatchesServer) GetLive(context.Context, *MatchRequest) (*MatchResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLive not implemented")
 }
 func (UnimplementedMatchesServer) mustEmbedUnimplementedMatchesServer() {}
 
@@ -71,7 +85,7 @@ func RegisterMatchesServer(s grpc.ServiceRegistrar, srv MatchesServer) {
 }
 
 func _Matches_GetUpcoming_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpcomingRequest)
+	in := new(MatchRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -83,7 +97,25 @@ func _Matches_GetUpcoming_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/Matches/GetUpcoming",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MatchesServer).GetUpcoming(ctx, req.(*UpcomingRequest))
+		return srv.(MatchesServer).GetUpcoming(ctx, req.(*MatchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Matches_GetLive_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MatchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MatchesServer).GetLive(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Matches/GetLive",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MatchesServer).GetLive(ctx, req.(*MatchRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -98,6 +130,10 @@ var Matches_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUpcoming",
 			Handler:    _Matches_GetUpcoming_Handler,
+		},
+		{
+			MethodName: "GetLive",
+			Handler:    _Matches_GetLive_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
