@@ -13,7 +13,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	matchendpoint "github.com/ficontini/euro2024/matchservice/endpoint"
+	"github.com/ficontini/euro2024/matchservice/queue"
 	"github.com/ficontini/euro2024/matchservice/service"
+	"github.com/ficontini/euro2024/matchservice/store"
 	"github.com/ficontini/euro2024/matchservice/transport"
 	"github.com/joho/godotenv"
 )
@@ -27,8 +29,10 @@ func main() {
 	}
 	var (
 		client      = sqs.NewFromConfig(cfg)
-		svc         = service.New()
-		consumer    = transport.NewSQSConsumer(client, os.Getenv(queue_url_env), svc)
+		store       = store.NewInMemoryStore()
+		svc         = service.New(store)
+		queueSvc    = queue.New(store)
+		consumer    = queue.NewSQSConsumer(client, os.Getenv(queue_url_env), queueSvc)
 		endpoints   = matchendpoint.New(svc)
 		httpHandler = transport.NewHTTPHandler(endpoints)
 	)

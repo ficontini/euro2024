@@ -3,30 +3,29 @@ package service
 import (
 	"context"
 	"os"
-	"time"
 
+	"github.com/ficontini/euro2024/matchservice/store"
 	"github.com/ficontini/euro2024/types"
 	"github.com/go-kit/log"
 )
 
 type Service interface {
-	ProcessData(context.Context, []*types.Match) error
 	GetUpcomingMatches(context.Context) ([]*types.Match, error)
 	GetLiveMatches(context.Context) ([]*types.Match, error)
-	GetMatchesByTeam(context.Context, string) ([]*types.Match, error)
+	//GetMatchesByTeam(context.Context, string) ([]*types.Match, error)
 }
 
 type basicService struct {
-	store Store
+	store store.Store
 }
 
-func newBasicService() Service {
+func newBasicService(store store.Store) Service {
 	return &basicService{
-		store: NewInMemoryStore(),
+		store: store,
 	}
 }
 
-func New() Service {
+func New(store store.Store) Service {
 	var (
 		logger log.Logger
 		svc    Service
@@ -35,21 +34,12 @@ func New() Service {
 		logger = log.NewLogfmtLogger(os.Stdout)
 		logger = log.With(logger, "service", "match")
 	}
-	svc = newBasicService()
+	svc = newBasicService(store)
 	svc = newLogMiddleware(logger)(svc)
 	return svc
 }
 
-func (svc *basicService) ProcessData(ctx context.Context, matches []*types.Match) error {
-	svc.store.Clean(ctx)
-	for _, m := range matches {
-		svc.store.Add(ctx, m)
-	}
-	return nil
-}
-
 func (svc *basicService) GetUpcomingMatches(ctx context.Context) ([]*types.Match, error) {
-	time.Sleep(2 * time.Second)
 	matches, err := svc.store.Get(ctx)
 	if err != nil {
 		return nil, err

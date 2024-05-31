@@ -1,14 +1,30 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto"; 
+
 option go_package = "github.com/ficontini/euro2024/matchservice/proto";
 
-service Match{
+service Matches{
     rpc GetUpcoming(UpcomingRequest) returns (UpcomingResponse){}
 }
 
 message UpcomingRequest {}
 
 message UpcomingResponse{
-    string Home = 1; 
-    string Away = 2; 
+    repeated Match matches = 1; 
+}
+message Match{
+    Team home = 1; 
+    Team away = 2; 
+    google.protobuf.Timestamp date = 3;
+    string status = 4; 
+    Location location = 5; 
+}
+message Location{
+    string city = 1; 
+    string stadium = 2; 
+}
+message Team{
+    string team = 1; 
+    int64 goals = 2; 
 }

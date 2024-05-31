@@ -1,4 +1,4 @@
-package transport
+package queue
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 
-	"github.com/ficontini/euro2024/matchservice/service"
 	"github.com/ficontini/euro2024/types"
 )
 
@@ -21,12 +20,12 @@ type Consumer interface {
 type sqsConsumer struct {
 	client   *sqs.Client
 	queueURL string
-	service  service.Service
+	service  Service
 	stopch   chan struct{}
 	wg       sync.WaitGroup
 }
 
-func NewSQSConsumer(client *sqs.Client, queueURL string, service service.Service) Consumer {
+func NewSQSConsumer(client *sqs.Client, queueURL string, service Service) Consumer {
 	return &sqsConsumer{
 		client:   client,
 		queueURL: queueURL,
