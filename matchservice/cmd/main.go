@@ -12,12 +12,14 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
-	matchendpoint "github.com/ficontini/euro2024/matchservice/endpoint"
+	matchendpoint "github.com/ficontini/euro2024/matchservice/pkg/endpoint"
+	"github.com/ficontini/euro2024/matchservice/pkg/service"
+	"github.com/ficontini/euro2024/matchservice/pkg/transport"
+	"github.com/ficontini/euro2024/matchservice/proto"
 	"github.com/ficontini/euro2024/matchservice/queue"
-	"github.com/ficontini/euro2024/matchservice/service"
 	"github.com/ficontini/euro2024/matchservice/store"
-	"github.com/ficontini/euro2024/matchservice/transport"
 	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
 )
 
 const queue_url_env = "QUEUE_URL"
@@ -35,6 +37,7 @@ func main() {
 		consumer    = queue.NewSQSConsumer(client, os.Getenv(queue_url_env), queueSvc)
 		endpoints   = matchendpoint.New(svc)
 		httpHandler = transport.NewHTTPHandler(endpoints)
+		grpcHandler = transport.NewGRPCServer(endpoints)
 	)
 
 	go func() {
@@ -49,6 +52,20 @@ func main() {
 			panic(err)
 		}
 	}()
+
+	go func() {
+		ln, err := net.Listen("tcp", ":3004")
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+		server := grpc.NewServer(grpc.EmptyServerOption{})
+		proto.RegisterMatchesServer(server, grpcHandler)
+		if err := server.Serve(ln); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

@@ -5,12 +5,13 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/ficontini/euro2024/matchservice/proto";
 
 service Matches{
-    rpc GetUpcoming(UpcomingRequest) returns (UpcomingResponse){}
+    rpc GetUpcoming(MatchRequest) returns (MatchResponse){}
+    rpc GetLive(MatchRequest) returns (MatchResponse){}
 }
 
-message UpcomingRequest {}
+message MatchRequest {}
 
-message UpcomingResponse{
+message MatchResponse{
     repeated Match matches = 1; 
 }
 message Match{

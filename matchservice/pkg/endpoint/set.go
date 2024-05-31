@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/ficontini/euro2024/matchservice/service"
+	"github.com/ficontini/euro2024/matchservice/pkg/service"
 	"github.com/ficontini/euro2024/types"
 	"github.com/go-kit/kit/circuitbreaker"
 	"github.com/go-kit/kit/endpoint"
@@ -17,7 +17,7 @@ type Set struct {
 }
 
 func (s Set) GetUpcomingMatches(ctx context.Context) ([]*types.Match, error) {
-	resp, err := s.GetUpcomingMatchesEndpoint(ctx, struct{}{})
+	resp, err := s.GetUpcomingMatchesEndpoint(ctx, MatchRequest{})
 	if err != nil {
 		return nil, err
 	}
@@ -121,6 +121,7 @@ func makeResponse(matches []*types.Match) MatchResponse {
 	}
 }
 
+type MatchRequest struct{}
 type MatchResponse struct {
 	Matches []Match `json:"matches"`
 }

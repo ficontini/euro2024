@@ -3,13 +3,14 @@ package transport
 import (
 	"context"
 
-	matchendpoint "github.com/ficontini/euro2024/matchservice/endpoint"
+	matchendpoint "github.com/ficontini/euro2024/matchservice/pkg/endpoint"
+	"github.com/ficontini/euro2024/matchservice/pkg/service"
 	"github.com/ficontini/euro2024/matchservice/proto"
-	"github.com/ficontini/euro2024/matchservice/service"
 	"github.com/ficontini/euro2024/types"
 	"github.com/go-kit/kit/endpoint"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type grpcServer struct {
@@ -29,7 +30,7 @@ func NewGRPCServer(endpoints matchendpoint.Set) proto.MatchesServer {
 	options := []grpctransport.ServerOption{}
 	return &grpcServer{
 		getUpcoming: grpctransport.NewServer(
-			endpoints.GetLiveMatchesEndpoint,
+			endpoints.GetUpcomingMatchesEndpoint,
 			decodeGRPCReq,
 			encodeGRPCResp,
 			options...,
@@ -44,8 +45,8 @@ func NewGRPCClient(conn *grpc.ClientConn) service.Service {
 	{
 		getEndpoint = grpctransport.NewClient(
 			conn,
-			"proto.GetUpcoming",
 			"Matches",
+			"GetUpcoming",
 			encodeGRPRequest,
 			decodeGRPResponse,
 			proto.UpcomingResponse{},
@@ -60,10 +61,43 @@ func NewGRPCClient(conn *grpc.ClientConn) service.Service {
 func decodeGRPCReq(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	return struct{}{}, nil
 }
-func encodeGRPCResp(_ context.Context, grpcResp interface{}) (interface{}, error) {
-	resp := grpcResp.(*proto.UpcomingResponse)
+func encodeGRPCResp(_ context.Context, resp interface{}) (interface{}, error) {
+	var (
+		response = resp.(matchendpoint.MatchResponse)
+		matches  []*proto.Match
+	)
+	for _, m := range response.Matches {
+		matches = append(matches,
+			&proto.Match{
+				Home: &proto.Team{
+					Team:  m.Home.Team,
+					Goals: int64(m.Home.Goals),
+				},
+				Away: &proto.Team{
+					Team:  m.Away.Team,
+					Goals: int64(m.Away.Goals),
+				},
+				Date:   timestamppb.New(m.Date),
+				Status: string(m.Status),
+				Location: &proto.Location{
+					City:    m.Location.City,
+					Stadium: m.Location.Stadium,
+				},
+			})
+	}
+	return &proto.UpcomingResponse{
+		Matches: matches,
+	}, nil
+}
+
+func encodeGRPRequest(context.Context, interface{}) (request interface{}, err error) {
+	return &proto.UpcomingRequest{}, nil
+}
+
+func decodeGRPResponse(_ context.Context, resp interface{}) (interface{}, error) {
+	response := resp.(*proto.UpcomingResponse)
 	var matches []matchendpoint.Match
-	for _, m := range resp.Matches {
+	for _, m := range response.Matches {
 		matches = append(matches,
 			matchendpoint.Match{
 				Home: matchendpoint.Team{
@@ -83,16 +117,7 @@ func encodeGRPCResp(_ context.Context, grpcResp interface{}) (interface{}, error
 			},
 		)
 	}
-	response := matchendpoint.MatchResponse{
+	return matchendpoint.MatchResponse{
 		Matches: matches,
-	}
-	return response, nil
-}
-
-func encodeGRPRequest(context.Context, interface{}) (request interface{}, err error) {
-	return nil, nil
-}
-
-func decodeGRPResponse(context.Context, interface{}) (response interface{}, err error) {
-	return nil, nil
+	}, nil
 }
