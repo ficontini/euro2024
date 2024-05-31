@@ -28,7 +28,7 @@ func main() {
 		})
 		sqsClient = sqs.NewFromConfig(cfg)
 		producer  = NewSQSProducer(os.Getenv(queueURL_env_var), sqsClient)
-		handler   = NewHandler(client, producer)
+		handler   = NewWebSocketHandler(client, producer)
 	)
 
 	lambda.Start(handler.HandleMessage)

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"time"
 
@@ -50,8 +49,6 @@ func (svc *basicService) ProcessData(ctx context.Context, matches []*types.Match
 }
 
 func (svc *basicService) GetUpcomingMatches(ctx context.Context) ([]*types.Match, error) {
-	fmt.Println("hiiiiiiii")
-	svc.store.FakeData(ctx)
 	time.Sleep(2 * time.Second)
 	matches, err := svc.store.Get(ctx)
 	if err != nil {

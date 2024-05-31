@@ -39,7 +39,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	messageJSON, err := json.Marshal(NewMessage(matches))
+	messageJSON, err := json.Marshal(types.NewMessage(matches))
 	if err != nil {
 		log.Fatal("marshalling err:", err)
 	}
@@ -54,17 +54,5 @@ func main() {
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(err)
-	}
-}
-
-type Message struct {
-	Action  string         `json:"action"`
-	Matches []*types.Match `json:"matches"`
-}
-
-func NewMessage(matches []*types.Match) Message {
-	return Message{
-		Action:  default_action,
-		Matches: matches,
 	}
 }

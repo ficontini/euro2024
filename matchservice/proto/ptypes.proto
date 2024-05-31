@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "github.com/ficontini/euro2024/matchservice/proto";
+
+service Match{
+    rpc GetUpcoming(UpcomingRequest) returns (UpcomingResponse){}
+}
+
+message UpcomingRequest {}
+
+message UpcomingResponse{
+    string Home = 1; 
+    string Away = 2; 
+}
