@@ -15,11 +15,12 @@ func main() {
 		httpAddr = "http://localhost:3003"
 		grpcAddr = "localhost:3004"
 	)
+
 	svc, err := transport.NewHTTPClient(httpAddr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	matches, err := svc.GetUpcomingMatches(context.Background())
+	matches, err := svc.GetLiveMatches(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,5 +43,4 @@ func main() {
 			fmt.Printf("%+v\n", m)
 		}
 	}()
-
 }

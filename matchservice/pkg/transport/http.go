@@ -40,6 +40,7 @@ func NewHTTPClient(instance string) (service.Service, error) {
 	var (
 		options          = []httptransport.ClientOption{}
 		upcomingEndpoint endpoint.Endpoint
+		liveEndpoint     endpoint.Endpoint
 	)
 	if !strings.HasPrefix(instance, "http") {
 		instance = "http://" + instance
@@ -56,9 +57,17 @@ func NewHTTPClient(instance string) (service.Service, error) {
 			decodeHTTPUpcomingResponse,
 			options...,
 		).Endpoint()
+		liveEndpoint = httptransport.NewClient(
+			http.MethodGet,
+			copyURL(u, "/matches/live"),
+			encodeHTTPGenericRequest,
+			decodeHTTPUpcomingResponse,
+			options...,
+		).Endpoint()
 	}
 	return matchendpoint.Set{
 		GetUpcomingMatchesEndpoint: upcomingEndpoint,
+		GetLiveMatchesEndpoint:     liveEndpoint,
 	}, nil
 }
 

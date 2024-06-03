@@ -70,5 +70,5 @@ func (svc *basicService) GetLiveMatches(ctx context.Context) ([]*types.Match, er
 	return live, nil
 }
 func (svc *basicService) GetMatchesByTeam(ctx context.Context, team string) ([]*types.Match, error) {
-	return nil, nil
+	return svc.GetMatchesByTeam(ctx, team)
 }

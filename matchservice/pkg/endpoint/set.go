@@ -38,7 +38,7 @@ func (s Set) GetUpcomingMatches(ctx context.Context) ([]*types.Match, error) {
 	return matches, nil
 }
 func (s Set) GetLiveMatches(ctx context.Context) ([]*types.Match, error) {
-	resp, err := s.GetLiveMatchesEndpoint(ctx, struct{}{})
+	resp, err := s.GetLiveMatchesEndpoint(ctx, MatchRequest{})
 	if err != nil {
 		return nil, err
 	}

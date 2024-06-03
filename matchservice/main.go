@@ -22,7 +22,11 @@ import (
 	"google.golang.org/grpc"
 )
 
-const queue_url_env = "QUEUE_URL"
+const (
+	queue_url_env     = "QUEUE_URL"
+	http_listener_env = "HTTP_LISTENER"
+	grpc_listener_env = "GRPC_LISTENER"
+)
 
 func main() {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
@@ -41,20 +45,20 @@ func main() {
 	)
 
 	go func() {
-		httpListener, err := net.Listen("tcp", ":3003")
+		httpListener, err := net.Listen("tcp", os.Getenv(http_listener_env))
 		if err != nil {
 			log.Fatal(err)
 			os.Exit(1)
 		}
 
-		fmt.Println("starting server")
+		fmt.Println("starting server on:", httpListener.Addr())
 		if err := http.Serve(httpListener, httpHandler); err != nil {
 			panic(err)
 		}
 	}()
 
 	go func() {
-		ln, err := net.Listen("tcp", ":3004")
+		ln, err := net.Listen("tcp", os.Getenv(grpc_listener_env))
 		if err != nil {
 			log.Fatal(err)
 			os.Exit(1)
