@@ -7,9 +7,14 @@ option go_package = "github.com/ficontini/euro2024/matchservice/proto";
 service Matches{
     rpc GetUpcoming(MatchRequest) returns (MatchResponse){}
     rpc GetLive(MatchRequest) returns (MatchResponse){}
+    rpc GetByTeam(TeamRequest) returns (MatchResponse) {}
 }
 
 message MatchRequest {}
+
+message TeamRequest{
+    string name = 1; 
+}
 
 message MatchResponse{
     repeated Match matches = 1; 
