@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type MatchesClient interface {
 	GetUpcoming(ctx context.Context, in *MatchRequest, opts ...grpc.CallOption) (*MatchResponse, error)
 	GetLive(ctx context.Context, in *MatchRequest, opts ...grpc.CallOption) (*MatchResponse, error)
+	GetByTeam(ctx context.Context, in *TeamRequest, opts ...grpc.CallOption) (*MatchResponse, error)
 }
 
 type matchesClient struct {
@@ -52,12 +53,22 @@ func (c *matchesClient) GetLive(ctx context.Context, in *MatchRequest, opts ...g
 	return out, nil
 }
 
+func (c *matchesClient) GetByTeam(ctx context.Context, in *TeamRequest, opts ...grpc.CallOption) (*MatchResponse, error) {
+	out := new(MatchResponse)
+	err := c.cc.Invoke(ctx, "/Matches/GetByTeam", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MatchesServer is the server API for Matches service.
 // All implementations must embed UnimplementedMatchesServer
 // for forward compatibility
 type MatchesServer interface {
 	GetUpcoming(context.Context, *MatchRequest) (*MatchResponse, error)
 	GetLive(context.Context, *MatchRequest) (*MatchResponse, error)
+	GetByTeam(context.Context, *TeamRequest) (*MatchResponse, error)
 	mustEmbedUnimplementedMatchesServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedMatchesServer) GetUpcoming(context.Context, *MatchRequest) (*
 }
 func (UnimplementedMatchesServer) GetLive(context.Context, *MatchRequest) (*MatchResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLive not implemented")
+}
+func (UnimplementedMatchesServer) GetByTeam(context.Context, *TeamRequest) (*MatchResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetByTeam not implemented")
 }
 func (UnimplementedMatchesServer) mustEmbedUnimplementedMatchesServer() {}
 
@@ -120,6 +134,24 @@ func _Matches_GetLive_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Matches_GetByTeam_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TeamRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MatchesServer).GetByTeam(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Matches/GetByTeam",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MatchesServer).GetByTeam(ctx, req.(*TeamRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Matches_ServiceDesc is the grpc.ServiceDesc for Matches service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +166,10 @@ var Matches_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetLive",
 			Handler:    _Matches_GetLive_Handler,
+		},
+		{
+			MethodName: "GetByTeam",
+			Handler:    _Matches_GetByTeam_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
