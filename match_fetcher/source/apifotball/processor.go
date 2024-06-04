@@ -1,17 +1,17 @@
-package main
+package apifotball
 
-import "github.com/ficontini/euro2024/types"
+import (
+	"github.com/ficontini/euro2024/match_fetcher/processor"
+	"github.com/ficontini/euro2024/types"
+)
 
-type Processor interface {
-	ProcessData(*APIResponse) ([]*types.Match, error)
-}
 type APIProcessor struct{}
 
-func NewApiProcessor() Processor {
+func NewApiProcessor() processor.Processor {
 	return &APIProcessor{}
 }
-
-func (p *APIProcessor) ProcessData(resp *APIResponse) ([]*types.Match, error) {
+func (p *APIProcessor) ProcessData(data any) ([]*types.Match, error) {
+	resp := data.(*APIResponse)
 	var (
 		matchResp []Match
 		matches   []*types.Match

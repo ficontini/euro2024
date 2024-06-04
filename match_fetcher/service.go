@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/ficontini/euro2024/match_fetcher/fetcher"
+	"github.com/ficontini/euro2024/match_fetcher/processor"
 	"github.com/ficontini/euro2024/types"
 )
 
@@ -11,11 +13,11 @@ type Service interface {
 }
 
 type basicService struct {
-	fetcher   Fetcher
-	processor Processor
+	fetcher   fetcher.Fetcher
+	processor processor.Processor
 }
 
-func New(fetcher Fetcher, processor Processor) Service {
+func New(fetcher fetcher.Fetcher, processor processor.Processor) Service {
 	return &basicService{
 		fetcher:   fetcher,
 		processor: processor,

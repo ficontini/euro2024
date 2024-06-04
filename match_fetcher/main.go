@@ -6,22 +6,21 @@ import (
 	"os"
 	"time"
 
+	"github.com/ficontini/euro2024/match_fetcher/source/openliga"
 	"github.com/joho/godotenv"
 )
 
 const (
 	ws_endpoint_env = "WS_ENDPOINT"
-	api_key_env     = "API_KEY"
-	api_host_env    = "API_HOST"
-	path            = "v3/fixtures?league=4&season=2024"
+	api_addr_env    = "OPENLIGA_ADDR"
 )
 
-var interval = 15 * time.Minute
+var interval = 1 * time.Hour
 
 func main() {
 	var (
-		fetcher   = NewAPIFetcher(os.Getenv(api_host_env), os.Getenv(api_key_env), path)
-		processor = NewApiProcessor()
+		fetcher   = openliga.NewAPIFetcher(os.Getenv(api_addr_env))
+		processor = openliga.NewApiProcessor()
 		svc       = New(fetcher, processor)
 		endpoint  = os.Getenv(ws_endpoint_env)
 	)

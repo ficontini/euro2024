@@ -1,4 +1,4 @@
-package main
+package apifotball
 
 import (
 	"encoding/json"
@@ -6,18 +6,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/ficontini/euro2024/match_fetcher/fetcher"
 )
 
-type Fetcher interface {
-	FetchData() (*APIResponse, error)
-}
 type APIFetcher struct {
 	APIHost string
 	Path    string
 	APIKey  string
 }
 
-func NewAPIFetcher(apiHost, apiKey, path string) Fetcher {
+func NewAPIFetcher(apiHost, apiKey, path string) fetcher.Fetcher {
 	return &APIFetcher{
 		APIHost: apiHost,
 		Path:    path,
@@ -25,7 +24,7 @@ func NewAPIFetcher(apiHost, apiKey, path string) Fetcher {
 	}
 }
 
-func (f *APIFetcher) FetchData() (*APIResponse, error) {
+func (f *APIFetcher) FetchData() (any, error) {
 	url := fmt.Sprintf("https://%s/%s", f.APIHost, f.Path)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
