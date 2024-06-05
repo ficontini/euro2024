@@ -33,6 +33,12 @@ func NewHTTPHandler(endpoints matchendpoint.Set) http.Handler {
 		encodeHTTPGenericResponse,
 		options...,
 	))
+	m.Handle("/matches", httptransport.NewServer(
+		endpoints.GetMatchesByTeamEndpoint,
+		decodeHTTPTeamRequest,
+		encodeHTTPGenericResponse,
+		options...,
+	))
 	return m
 }
 
@@ -41,6 +47,7 @@ func NewHTTPClient(instance string) (service.Service, error) {
 		options          = []httptransport.ClientOption{}
 		upcomingEndpoint endpoint.Endpoint
 		liveEndpoint     endpoint.Endpoint
+		teamEndpoint     endpoint.Endpoint
 	)
 	if !strings.HasPrefix(instance, "http") {
 		instance = "http://" + instance
@@ -64,10 +71,18 @@ func NewHTTPClient(instance string) (service.Service, error) {
 			decodeHTTPUpcomingResponse,
 			options...,
 		).Endpoint()
+		teamEndpoint = httptransport.NewClient(
+			http.MethodGet,
+			copyURL(u, "/matches"),
+			encodeHTTPGenericRequest,
+			decodeHTTPUpcomingResponse,
+			options...,
+		).Endpoint()
 	}
 	return matchendpoint.Set{
 		GetUpcomingMatchesEndpoint: upcomingEndpoint,
 		GetLiveMatchesEndpoint:     liveEndpoint,
+		GetMatchesByTeamEndpoint:   teamEndpoint,
 	}, nil
 }
 
@@ -76,6 +91,16 @@ func decodeHTTPRequest(ctx context.Context, r *http.Request) (interface{}, error
 		return nil, ErrNotAllowed()
 	}
 	return struct{}{}, nil
+}
+func decodeHTTPTeamRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req matchendpoint.TeamRequest
+	if r.Method != http.MethodGet {
+		return nil, ErrNotAllowed()
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, err
+	}
+	return &req, nil
 }
 
 func encodeHTTPGenericResponse(ctx context.Context, w http.ResponseWriter, v interface{}) error {

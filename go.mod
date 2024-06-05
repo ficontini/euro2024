@@ -11,6 +11,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.32.3
 	github.com/go-kit/kit v0.13.0
 	github.com/go-kit/log v0.2.0
+	github.com/gofiber/fiber/v2 v2.52.4
+	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/websocket v1.5.1
 	github.com/joho/godotenv v1.5.1
 	github.com/sony/gobreaker v1.0.0
@@ -33,8 +35,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.28.10 // indirect
 	github.com/aws/smithy-go v1.20.2 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
-	github.com/gofiber/fiber/v2 v2.52.4 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

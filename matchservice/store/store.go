@@ -10,6 +10,7 @@ import (
 type Store interface {
 	Add(context.Context, *types.Match) error
 	Get(context.Context) ([]*types.Match, error)
+	GetMatchesByTeam(context.Context, string) ([]*types.Match, error)
 	Clean(context.Context) error
 }
 
@@ -24,6 +25,7 @@ func NewInMemoryStore() Store {
 		matchesByTeam: make(map[string][]*types.Match),
 		matches:       []*types.Match{},
 	}
+
 }
 func (s *InMemoryStore) Add(_ context.Context, match *types.Match) error {
 	s.mu.Lock()
@@ -31,8 +33,8 @@ func (s *InMemoryStore) Add(_ context.Context, match *types.Match) error {
 
 	s.matches = append(s.matches, match)
 
-	s.matchesByTeam[match.Home] = append(s.matchesByTeam[match.Home], match)
-	s.matchesByTeam[match.Away] = append(s.matchesByTeam[match.Away], match)
+	s.matchesByTeam[match.Home.Name] = append(s.matchesByTeam[match.Home.Name], match)
+	s.matchesByTeam[match.Away.Name] = append(s.matchesByTeam[match.Away.Name], match)
 
 	return nil
 }

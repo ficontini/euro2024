@@ -12,7 +12,7 @@ import (
 type Service interface {
 	GetUpcomingMatches(context.Context) ([]*types.Match, error)
 	GetLiveMatches(context.Context) ([]*types.Match, error)
-	//GetMatchesByTeam(context.Context, string) ([]*types.Match, error)
+	GetMatchesByTeam(context.Context, string) ([]*types.Match, error)
 }
 
 type basicService struct {
@@ -70,5 +70,5 @@ func (svc *basicService) GetLiveMatches(ctx context.Context) ([]*types.Match, er
 	return live, nil
 }
 func (svc *basicService) GetMatchesByTeam(ctx context.Context, team string) ([]*types.Match, error) {
-	return svc.GetMatchesByTeam(ctx, team)
+	return svc.store.GetMatchesByTeam(ctx, team)
 }

@@ -13,22 +13,20 @@ const (
 )
 
 type Match struct {
-	Date     time.Time
-	Location *Location
-	Home     string
-	Away     string
-	Status   MatchStatus
-	Result   *Result
+	Date     time.Time   `json:"date"`
+	Location *Location   `json:"location"`
+	Home     *MatchTeam  `json:"home"`
+	Away     *MatchTeam  `json:"away"`
+	Status   MatchStatus `json:"status"`
 }
 
-func NewMatch(date time.Time, location *Location, home, away string, status MatchStatus, result *Result) *Match {
+func NewMatch(date time.Time, location *Location, home, away *MatchTeam, status MatchStatus) *Match {
 	return &Match{
 		Date:     date,
 		Location: location,
 		Home:     home,
 		Away:     away,
 		Status:   status,
-		Result:   result,
 	}
 }
 func (m *Match) IsLive() bool {
@@ -39,8 +37,8 @@ func (m *Match) IsUpcoming() bool {
 }
 
 type Location struct {
-	City    string
-	Stadium string
+	City    string `json:"city"`
+	Stadium string `json:"stadium"`
 }
 
 func NewLocation(city, stadium string) *Location {
@@ -50,15 +48,15 @@ func NewLocation(city, stadium string) *Location {
 	}
 }
 
-type Result struct {
-	Home int
-	Away int
+type MatchTeam struct {
+	Name  string `json:"name"`
+	Goals int    `json:"goals"`
 }
 
-func NewResult(home, away int) *Result {
-	return &Result{
-		Home: home,
-		Away: away,
+func NewMatchTeam(name string, goals int) *MatchTeam {
+	return &MatchTeam{
+		Name:  name,
+		Goals: goals,
 	}
 }
 

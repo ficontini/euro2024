@@ -1,13 +1,13 @@
 package apifotball
 
 import (
-	"github.com/ficontini/euro2024/match_fetcher/processor"
+	"github.com/ficontini/euro2024/match_fetcher/service"
 	"github.com/ficontini/euro2024/types"
 )
 
 type APIProcessor struct{}
 
-func NewApiProcessor() processor.Processor {
+func NewApiProcessor() service.Processor {
 	return &APIProcessor{}
 }
 func (p *APIProcessor) ProcessData(data any) ([]*types.Match, error) {
@@ -24,13 +24,9 @@ func (p *APIProcessor) ProcessData(data any) ([]*types.Match, error) {
 				m.Fixture.Venue.City,
 				m.Fixture.Venue.Name,
 			),
-			m.Teams.Home.Name,
-			m.Teams.Away.Name,
+			types.NewMatchTeam(m.Teams.Home.Name, m.Goals.Home),
+			types.NewMatchTeam(m.Teams.Away.Name, m.Goals.Away),
 			processStatus(m.Fixture.Status),
-			types.NewResult(
-				m.Goals.Home,
-				m.Goals.Away,
-			),
 		)
 		matches = append(matches, match)
 	}

@@ -48,14 +48,14 @@ func (m *LogMiddleware) GetLiveMatches(ctx context.Context) (matches []*types.Ma
 	return matches, err
 }
 
-// func (m *LogMiddleware) GetMatchesByTeam(ctx context.Context, team string) (matches []*types.Match, err error) {
-// 	defer func() {
-// 		var count int
-// 		if matches != nil {
-// 			count = len(matches)
-// 		}
-// 		m.logger.Log("method", "GetMatchesByTeam", "team", team, "count:", count, "err", err)
-// 	}()
-// 	matches, err = m.next.GetMatchesByTeam(ctx, team)
-// 	return matches, err
-// }
+func (m *LogMiddleware) GetMatchesByTeam(ctx context.Context, team string) (matches []*types.Match, err error) {
+	defer func() {
+		var count int
+		if matches != nil {
+			count = len(matches)
+		}
+		m.logger.Log("method", "GetMatchesByTeam", "team", team, "count:", count, "err", err)
+	}()
+	matches, err = m.next.GetMatchesByTeam(ctx, team)
+	return matches, err
+}

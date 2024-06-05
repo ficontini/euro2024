@@ -4,16 +4,17 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/ficontini/euro2024/match_fetcher/service"
 	"github.com/ficontini/euro2024/types"
 	"github.com/gorilla/websocket"
 )
 
 type WebSocketClient struct {
-	service Service
+	service service.Service
 	conn    *websocket.Conn
 }
 
-func NewWebSocketClient(endpoint string, service Service) (*WebSocketClient, error) {
+func NewWebSocketClient(endpoint string, service service.Service) (*WebSocketClient, error) {
 	conn, _, err := websocket.DefaultDialer.Dial(endpoint, nil)
 	if err != nil {
 		return nil, err

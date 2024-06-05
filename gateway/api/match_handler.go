@@ -1,6 +1,9 @@
 package api
 
 import (
+	"errors"
+	"strings"
+
 	"github.com/ficontini/euro2024/matchservice/pkg/service"
 	"github.com/gofiber/fiber/v2"
 )
@@ -30,7 +33,34 @@ func (h *MatchHandler) HandleGetLiveMatches(c *fiber.Ctx) error {
 	return c.JSON(matches)
 }
 func (h *MatchHandler) HandleGetMatchesByTeam(c *fiber.Ctx) error {
-	team := c.Params("team")
-	_ = team
-	return nil
+	param := c.Params("team")
+	team, err := validateTeamParameter(param)
+	if err != nil {
+		return ErrInvalidParam()
+	}
+	matches, err := h.svc.GetMatchesByTeam(c.Context(), team)
+	if err != nil {
+		return err
+	}
+	if len(matches) == 0 {
+		return ErrResourceNotFound(team)
+	}
+	return c.JSON(matches)
+}
+
+func validateTeamParameter(value string) (string, error) {
+	if len(value) == 0 {
+		return "", errors.New("empty value")
+	}
+	if len(value) == 1 {
+		return "", errors.New("invalid value")
+	}
+	var (
+		builder strings.Builder
+		first   = strings.ToUpper(string(value[0]))
+		last    = strings.ToLower(string(value[1:]))
+	)
+	builder.WriteString(first)
+	builder.WriteString(last)
+	return builder.String(), nil
 }

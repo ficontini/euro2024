@@ -1,11 +1,12 @@
 package openliga
 
 type Match struct {
-	Date     string   `json:"matchDateTime"`
-	Team1    Team     `json:"team1"`
-	Team2    Team     `json:"team2"`
-	Location Location `json:"location"`
-	Goals    []Goal   `json:"matchResults"`
+	Date       string   `json:"matchDateTime"`
+	IsFinished bool     `json:"matchIsFinished"`
+	Team1      Team     `json:"team1"`
+	Team2      Team     `json:"team2"`
+	Location   Location `json:"location"`
+	Goals      []Goal   `json:"matchResults"`
 }
 type Team struct {
 	Name string `json:"teamName"`

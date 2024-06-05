@@ -6,7 +6,6 @@ import (
 	matchendpoint "github.com/ficontini/euro2024/matchservice/pkg/endpoint"
 	"github.com/ficontini/euro2024/matchservice/pkg/service"
 	"github.com/ficontini/euro2024/matchservice/proto"
-	"github.com/ficontini/euro2024/matchservice/util"
 	"github.com/go-kit/kit/endpoint"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	"google.golang.org/grpc"
@@ -15,6 +14,7 @@ import (
 type grpcServer struct {
 	getUpcoming grpctransport.Handler
 	getLive     grpctransport.Handler
+	getByTeam   grpctransport.Handler
 	proto.UnimplementedMatchesServer
 }
 
@@ -27,6 +27,13 @@ func (s *grpcServer) GetUpcoming(ctx context.Context, req *proto.MatchRequest) (
 }
 func (s *grpcServer) GetLive(ctx context.Context, req *proto.MatchRequest) (*proto.MatchResponse, error) {
 	_, rep, err := s.getLive.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*proto.MatchResponse), nil
+}
+func (s *grpcServer) GetByTeam(ctx context.Context, req *proto.TeamRequest) (*proto.MatchResponse, error) {
+	_, rep, err := s.getByTeam.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -48,6 +55,12 @@ func NewGRPCServer(endpoints matchendpoint.Set) proto.MatchesServer {
 			encodeGRPCResp,
 			options...,
 		),
+		getByTeam: grpctransport.NewServer(
+			endpoints.GetMatchesByTeamEndpoint,
+			decodeGRPCTeamReq,
+			encodeGRPCResp,
+			options...,
+		),
 	}
 }
 func NewGRPCClient(conn *grpc.ClientConn) service.Service {
@@ -55,6 +68,7 @@ func NewGRPCClient(conn *grpc.ClientConn) service.Service {
 		options             = []grpctransport.ClientOption{}
 		getUpcomingEndpoint endpoint.Endpoint
 		getLiveEndpoint     endpoint.Endpoint
+		getByTeamEndpoint   endpoint.Endpoint
 	)
 	{
 		getUpcomingEndpoint = grpctransport.NewClient(
@@ -75,27 +89,47 @@ func NewGRPCClient(conn *grpc.ClientConn) service.Service {
 			proto.MatchResponse{},
 			options...,
 		).Endpoint()
+		getByTeamEndpoint = grpctransport.NewClient(
+			conn,
+			"Matches",
+			"GetByTeam",
+			encodeGRPTeamRequest,
+			decodeGRPResponse,
+			proto.MatchResponse{},
+			options...,
+		).Endpoint()
+
 	}
 	return matchendpoint.Set{
 		GetUpcomingMatchesEndpoint: getUpcomingEndpoint,
 		GetLiveMatchesEndpoint:     getLiveEndpoint,
+		GetMatchesByTeamEndpoint:   getByTeamEndpoint,
 	}
 
 }
 func decodeGRPCReq(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	return struct{}{}, nil
 }
+func decodeGRPCTeamReq(_ context.Context, grpcRep interface{}) (interface{}, error) {
+	req := grpcRep.(*proto.TeamRequest)
+	return &matchendpoint.TeamRequest{Team: req.Name}, nil
+}
 func encodeGRPCResp(_ context.Context, resp interface{}) (interface{}, error) {
 	response := resp.(matchendpoint.MatchResponse)
-	return util.NewProtoMatchResponseFromMatchResponse(response), nil
+	return matchendpoint.NewProtoMatchResponseFromMatchResponse(response), nil
 
 }
 
 func encodeGRPRequest(context.Context, interface{}) (request interface{}, err error) {
 	return &proto.MatchRequest{}, nil
 }
-
+func encodeGRPTeamRequest(_ context.Context, req interface{}) (interface{}, error) {
+	request := req.(*matchendpoint.TeamRequest)
+	return &proto.TeamRequest{
+		Name: request.Team,
+	}, nil
+}
 func decodeGRPResponse(_ context.Context, resp interface{}) (interface{}, error) {
 	response := resp.(*proto.MatchResponse)
-	return util.NewMatchResponseFromProtoMatchResponse(response), nil
+	return matchendpoint.NewMatchResponseFromProtoMatchResponse(response), nil
 }

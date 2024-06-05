@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/ficontini/euro2024/match_fetcher/service"
 	"github.com/ficontini/euro2024/match_fetcher/source/openliga"
 	"github.com/joho/godotenv"
 )
@@ -21,7 +22,7 @@ func main() {
 	var (
 		fetcher   = openliga.NewAPIFetcher(os.Getenv(api_addr_env))
 		processor = openliga.NewApiProcessor()
-		svc       = New(fetcher, processor)
+		svc       = service.New(fetcher, processor)
 		endpoint  = os.Getenv(ws_endpoint_env)
 	)
 	client, err := NewWebSocketClient(endpoint, svc)

@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/ficontini/euro2024/match_fetcher/fetcher"
+	"github.com/ficontini/euro2024/match_fetcher/service"
 )
 
 type APIFetcher struct {
@@ -16,7 +16,7 @@ type APIFetcher struct {
 	APIKey  string
 }
 
-func NewAPIFetcher(apiHost, apiKey, path string) fetcher.Fetcher {
+func NewAPIFetcher(apiHost, apiKey, path string) service.Fetcher {
 	return &APIFetcher{
 		APIHost: apiHost,
 		Path:    path,

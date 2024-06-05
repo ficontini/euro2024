@@ -1,23 +1,29 @@
-package main
+package service
 
 import (
 	"context"
 
-	"github.com/ficontini/euro2024/match_fetcher/fetcher"
-	"github.com/ficontini/euro2024/match_fetcher/processor"
 	"github.com/ficontini/euro2024/types"
 )
+
+type Fetcher interface {
+	FetchData() (any, error)
+}
+
+type Processor interface {
+	ProcessData(any) ([]*types.Match, error)
+}
 
 type Service interface {
 	FetchMatches(context.Context) ([]*types.Match, error)
 }
 
 type basicService struct {
-	fetcher   fetcher.Fetcher
-	processor processor.Processor
+	fetcher   Fetcher
+	processor Processor
 }
 
-func New(fetcher fetcher.Fetcher, processor processor.Processor) Service {
+func New(fetcher Fetcher, processor Processor) Service {
 	return &basicService{
 		fetcher:   fetcher,
 		processor: processor,

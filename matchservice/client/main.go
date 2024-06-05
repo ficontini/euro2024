@@ -15,7 +15,6 @@ func main() {
 		httpAddr = "http://localhost:3003"
 		grpcAddr = "localhost:3004"
 	)
-
 	svc, err := transport.NewHTTPClient(httpAddr)
 	if err != nil {
 		log.Fatal(err)
@@ -36,6 +35,13 @@ func main() {
 		defer conn.Close()
 		svc := transport.NewGRPCClient(conn)
 		matches, err := svc.GetUpcomingMatches(context.Background())
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, m := range matches {
+			fmt.Printf("%+v\n", m)
+		}
+		matches, err = svc.GetMatchesByTeam(context.Background(), "Deutschland")
 		if err != nil {
 			log.Fatal(err)
 		}
