@@ -44,7 +44,6 @@ func (s *InMemoryStore) Get(_ context.Context) ([]*types.Match, error) {
 func (s *InMemoryStore) GetMatchesByTeam(_ context.Context, team string) ([]*types.Match, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	return s.matchesByTeam[team], nil
 }
 func (s *InMemoryStore) Clean(_ context.Context) error {

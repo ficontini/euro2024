@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -82,9 +83,35 @@ func main() {
 	consumer.Stop(ctx)
 
 }
-
 func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
+	Load(".env")
+}
+
+func Load(envFile string) {
+	err := godotenv.Load(dir(envFile))
+	if err != nil {
+		panic(fmt.Errorf("Error loading .env file: %w", err))
 	}
+}
+
+func dir(envFile string) string {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	for {
+		goModPath := filepath.Join(currentDir, "go.mod")
+		if _, err := os.Stat(goModPath); err == nil {
+			break
+		}
+
+		parent := filepath.Dir(currentDir)
+		if parent == currentDir {
+			panic(fmt.Errorf("go.mod not found"))
+		}
+		currentDir = parent
+	}
+
+	return filepath.Join(currentDir, envFile)
 }

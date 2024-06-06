@@ -33,7 +33,7 @@ func (m *Match) IsLive() bool {
 	return m.Status == LIVE
 }
 func (m *Match) IsUpcoming() bool {
-	return m.Date.After(time.Now())
+	return m.Date.After(time.Now()) && m.Status != FINISH && m.Status != LIVE
 }
 
 type Location struct {
