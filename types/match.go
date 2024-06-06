@@ -5,11 +5,10 @@ import "time"
 type MatchStatus string
 
 const (
-	NS             MatchStatus = "No Started"
-	LIVE           MatchStatus = "Live"
-	FINISH         MatchStatus = "Finish"
-	UNKNOWN        MatchStatus = "Unknown"
-	default_action             = "sendMessage"
+	NS      MatchStatus = "No Started"
+	LIVE    MatchStatus = "Live"
+	FINISH  MatchStatus = "Finish"
+	UNKNOWN MatchStatus = "Unknown"
 )
 
 type Match struct {
@@ -57,17 +56,5 @@ func NewMatchTeam(name string, goals int) *MatchTeam {
 	return &MatchTeam{
 		Name:  name,
 		Goals: goals,
-	}
-}
-
-type Message struct {
-	Action  string   `json:"action"`
-	Matches []*Match `json:"matches"`
-}
-
-func NewMessage(matches []*Match) Message {
-	return Message{
-		Action:  default_action,
-		Matches: matches,
 	}
 }

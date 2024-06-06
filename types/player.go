@@ -1,43 +1,18 @@
 package types
 
-type Team struct {
-	ID      int
-	Name    string
-	Stadium *Stadium
-	Players []*Player
-}
-
-func NewTeam(id int, name string, stadium *Stadium) *Team {
-	return &Team{
-		ID:      id,
-		Name:    name,
-		Stadium: stadium,
-	}
-}
-
-type Stadium struct {
-	Name string
-	City string
-}
-
-func NewStadium(name, city string) *Stadium {
-	return &Stadium{
-		Name: name,
-		City: city,
-	}
-}
-
 type Player struct {
 	FirstName  string
 	LastName   string
+	Team       string
 	Age        int
 	Statistics *Statistics
 }
 
-func NewPlayer(firstName, lastName string, age int, statistics *Statistics) *Player {
+func NewPlayer(firstName, lastName, team string, age int, statistics *Statistics) *Player {
 	return &Player{
 		FirstName:  firstName,
 		LastName:   lastName,
+		Team:       team,
 		Age:        age,
 		Statistics: statistics,
 	}

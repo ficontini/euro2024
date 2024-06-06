@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/ficontini/euro2024/match_fetcher/service"
+	"github.com/ficontini/euro2024/player_fetcher/service"
 	"github.com/ficontini/euro2024/types"
 	"github.com/gorilla/websocket"
 )
 
-const default_action = "sendMessage"
+const default_action = "sendPlayers"
 
 type WebSocketClient struct {
 	service service.Service
@@ -28,11 +28,11 @@ func NewWebSocketClient(endpoint string, service service.Service) (*WebSocketCli
 }
 
 func (c *WebSocketClient) SendMessage(ctx context.Context) error {
-	matches, err := c.service.FetchMatches(ctx)
+	players, err := c.service.FetchData()
 	if err != nil {
 		return err
 	}
-	messageJSON, err := json.Marshal(NewMessage(matches))
+	messageJSON, err := json.Marshal(NewMessage(players))
 	if err != nil {
 		return err
 	}
@@ -44,13 +44,13 @@ func (c *WebSocketClient) Close() error {
 }
 
 type Message struct {
-	Action  string         `json:"action"`
-	Matches []*types.Match `json:"matches"`
+	Action  string          `json:"action"`
+	Players []*types.Player `json:"players"`
 }
 
-func NewMessage(matches []*types.Match) Message {
+func NewMessage(players []*types.Player) Message {
 	return Message{
 		Action:  default_action,
-		Matches: matches,
+		Players: players,
 	}
 }
