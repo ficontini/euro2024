@@ -24,7 +24,7 @@ var config = fiber.Config{
 func main() {
 	listenAddr := os.Getenv(listen_addr_en_var)
 	grpcAddr := os.Getenv(grpc_addr_env_var)
-	conn, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,7 +33,8 @@ func main() {
 	var (
 		svc     = transport.NewGRPCClient(conn)
 		app     = fiber.New(config)
-		matches = app.Group("/matches")
+		apiv1   = app.Group("/api/v1")
+		matches = apiv1.Group("/matches")
 		handler = api.NewMatchHandler(svc)
 	)
 	matches.Get("/upcoming", handler.HandleGetUpcomingMatches)
