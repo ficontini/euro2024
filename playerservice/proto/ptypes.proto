@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "github.com/ficontini/euro2024/playerservice/proto";
+
+service Players{
+    rpc GetByTeam(Request) returns (Response) {}
+}
+
+message Request{
+    string name = 1; 
+}
+
+message Response{
+    repeated Player players = 1; 
+}
+message Player{
+    string firstName = 1; 
+    string lastName = 2; 
+    int32 age = 3; 
+    int32 shots = 4; 
+    int32 goals = 5; 
+    int32 assists = 6; 
+    int32 yellowCards = 7; 
+    int32 redCards = 8; 
+}

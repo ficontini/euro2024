@@ -6,6 +6,7 @@ import (
 
 	"github.com/ficontini/euro2024/gateway/api"
 	"github.com/ficontini/euro2024/matchservice/pkg/transport"
+	playertransport "github.com/ficontini/euro2024/playerservice/transport"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
@@ -13,8 +14,9 @@ import (
 )
 
 const (
-	grpc_addr_env_var  = "GRPC_LISTENER"
-	listen_addr_en_var = "GATEWAY_ADDR"
+	matchGrpcAddrEnvVar  = "GRPC_LISTENER"
+	playerGrpcAddrEnvVar = "PLAYER_GRPC_LISTENER"
+	listenAddrEnVar      = "GATEWAY_ADDR"
 )
 
 var config = fiber.Config{
@@ -22,24 +24,33 @@ var config = fiber.Config{
 }
 
 func main() {
-	listenAddr := os.Getenv(listen_addr_en_var)
-	grpcAddr := os.Getenv(grpc_addr_env_var)
-	conn, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	matchServiceConn, err := newGRPCConnection(getEnv(matchGrpcAddrEnvVar))
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer conn.Close()
+	defer matchServiceConn.Close()
+
+	playerServiceConn, err := newGRPCConnection(getEnv(playerGrpcAddrEnvVar))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer playerServiceConn.Close()
 
 	var (
-		svc     = transport.NewGRPCClient(conn)
-		app     = fiber.New(config)
-		apiv1   = app.Group("/api/v1")
-		matches = apiv1.Group("/matches")
-		handler = api.NewMatchHandler(svc)
+		listenAddr    = getEnv(listenAddrEnVar)
+		matchService  = transport.NewGRPCClient(matchServiceConn)
+		playerService = playertransport.NewGRPCClient(playerServiceConn)
+		app           = fiber.New(config)
+		apiv1         = app.Group("/api/v1")
+		matches       = apiv1.Group("/matches")
+		matchHandler  = api.NewMatchHandler(matchService)
+		playerHandler = api.NewPlayerHandler(playerService)
 	)
-	matches.Get("/upcoming", handler.HandleGetUpcomingMatches)
-	matches.Get("/live", handler.HandleGetLiveMatches)
-	matches.Get("/:team", handler.HandleGetMatchesByTeam)
+
+	matches.Get("/upcoming", matchHandler.HandleGetUpcomingMatches)
+	matches.Get("/live", matchHandler.HandleGetLiveMatches)
+	matches.Get("/:team", matchHandler.HandleGetMatchesByTeam)
+	matches.Get("/:team/players", playerHandler.HandleGetPlayersByTeam)
 	log.Fatal(app.Listen(listenAddr))
 }
 
@@ -47,4 +58,18 @@ func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(err)
 	}
+}
+func getEnv(key string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		log.Fatalf("env var %s not set", key)
+	}
+	return value
+}
+func newGRPCConnection(addr string) (*grpc.ClientConn, error) {
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
 }

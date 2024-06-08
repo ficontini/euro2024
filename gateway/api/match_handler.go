@@ -1,8 +1,7 @@
 package api
 
 import (
-	"errors"
-	"strings"
+	"fmt"
 
 	"github.com/ficontini/euro2024/matchservice/pkg/service"
 	"github.com/gofiber/fiber/v2"
@@ -43,24 +42,7 @@ func (h *MatchHandler) HandleGetMatchesByTeam(c *fiber.Ctx) error {
 		return err
 	}
 	if len(matches) == 0 {
-		return ErrResourceNotFound(team)
+		return ErrResourceNotFound(fmt.Sprintf("matches not found for team: %s", team))
 	}
 	return c.JSON(matches)
-}
-
-func validateTeamParameter(value string) (string, error) {
-	if len(value) == 0 {
-		return "", errors.New("empty value")
-	}
-	if len(value) == 1 {
-		return "", errors.New("invalid value")
-	}
-	var (
-		builder strings.Builder
-		first   = strings.ToUpper(string(value[0]))
-		last    = strings.ToLower(string(value[1:]))
-	)
-	builder.WriteString(first)
-	builder.WriteString(last)
-	return builder.String(), nil
 }

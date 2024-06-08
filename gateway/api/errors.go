@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -32,6 +31,6 @@ func NewError(code int, err string) Error {
 func ErrInvalidParam() Error {
 	return NewError(http.StatusBadRequest, "invalid param")
 }
-func ErrResourceNotFound(team string) Error {
-	return NewError(http.StatusNotFound, fmt.Sprintf("matches not found for team: %s", team))
+func ErrResourceNotFound(msg string) Error {
+	return NewError(http.StatusNotFound, msg)
 }

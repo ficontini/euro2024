@@ -25,13 +25,18 @@ func NewSQSProducer(queueURL string, client *sqs.Client) Producer {
 	}
 }
 func (svc *SQSProducer) ProduceData(ctx context.Context, players []*types.Player) error {
-	b, err := json.Marshal(players)
-	if err != nil {
-		return err
+	for i := 0; i < len(players); i++ {
+		b, err := json.Marshal(players[i])
+		if err != nil {
+			return err
+		}
+		_, err = svc.client.SendMessage(ctx, &sqs.SendMessageInput{
+			MessageBody: aws.String(string(b)),
+			QueueUrl:    &svc.queueURL,
+		})
+		if err != nil {
+			return err
+		}
 	}
-	_, err = svc.client.SendMessage(ctx, &sqs.SendMessageInput{
-		MessageBody: aws.String(string(b)),
-		QueueUrl:    &svc.queueURL,
-	})
-	return err
+	return nil
 }
