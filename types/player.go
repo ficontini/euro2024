@@ -3,12 +3,12 @@ package types
 type Player struct {
 	FirstName   string `json:"firstName" dynamodbav:"firstName"`
 	LastName    string `json:"lastName" dynamodbav:"lastName"`
-	Team        string `json:"-" dynamodbav:"team"`
+	Team        string `json:"team" dynamodbav:"team"`
 	Age         int    `json:"age" dynamodbav:"age"`
 	Shots       int    `json:"shots" dynamodbav:"shots"`
 	Goals       int    `json:"goals" dynamodbav:"goals"`
 	Assists     int    `json:"assists" dynamodbav:"assists"`
-	YellowCards int    `json:"yellowCards"dynamodbav:"yellowCards"`
+	YellowCards int    `json:"yellowCards" dynamodbav:"yellowCards"`
 	RedCards    int    `json:"redCards" dynamodbav:"redCards"`
 }
 

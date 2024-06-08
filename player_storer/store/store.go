@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
@@ -29,6 +30,7 @@ func NewDynamoDBStore(client *dynamodb.Client) Storer {
 	}
 }
 func (s *DynamoDBStore) InsertPlayer(ctx context.Context, player *types.Player) error {
+	fmt.Printf("player: %+v\n", player)
 	item, err := attributevalue.MarshalMap(player)
 	if err != nil {
 		return err
