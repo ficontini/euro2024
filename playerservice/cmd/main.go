@@ -10,14 +10,14 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 
-	playerendpoint "github.com/ficontini/euro2024/playerservice/endpoint"
+	playerendpoint "github.com/ficontini/euro2024/playerservice/pkg/endpoint"
+	"github.com/ficontini/euro2024/playerservice/pkg/service"
+	"github.com/ficontini/euro2024/playerservice/pkg/transport"
 	"github.com/ficontini/euro2024/playerservice/proto"
-	"github.com/ficontini/euro2024/playerservice/service"
 	"github.com/ficontini/euro2024/playerservice/store"
-	"github.com/ficontini/euro2024/playerservice/transport"
+	"github.com/ficontini/euro2024/util"
 )
 
 const playerGrpcListenerEnv = "PLAYER_GRPC_LISTENER"
@@ -59,7 +59,5 @@ func main() {
 
 }
 func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
-	}
+	util.Load(".env")
 }

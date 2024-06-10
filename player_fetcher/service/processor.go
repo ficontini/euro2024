@@ -29,13 +29,14 @@ func (p *APIProcessor) processApiResponse(resp []PlayerResp) {
 }
 func newPlayer(r PlayerResp) *types.Player {
 	var (
-		performace = newPerfomance(r.Statistics[0])
+		statistics = r.Statistics[0]
+		performace = newPerfomance(statistics)
 		player     = r.Player
 	)
 	return types.NewPlayer(
 		player.FirstName,
 		player.LastName,
-		player.Nationality,
+		statistics.Team.Name,
 		player.Age,
 		performace,
 	)

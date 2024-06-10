@@ -3,7 +3,7 @@ package playerendpoint
 import (
 	"context"
 
-	"github.com/ficontini/euro2024/playerservice/service"
+	"github.com/ficontini/euro2024/playerservice/pkg/service"
 	"github.com/ficontini/euro2024/types"
 	"github.com/go-kit/kit/endpoint"
 )

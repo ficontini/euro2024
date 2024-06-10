@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	"github.com/ficontini/euro2024/player_fetcher/service"
 	"github.com/joho/godotenv"
@@ -13,6 +14,7 @@ const (
 	api_key_env     = "API_KEY"
 	api_host_env    = "API_HOST"
 	ws_endpoint_env = "WS_ENDPOINT"
+	interval        = 24 * time.Hour
 )
 
 func main() {
@@ -33,9 +35,13 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if err := client.SendMessage(ctx); err != nil {
-		log.Fatal(err)
+	for {
+		if err := client.SendMessage(ctx); err != nil {
+			log.Fatal(err)
+		}
+		time.Sleep(interval)
 	}
+
 }
 
 func init() {

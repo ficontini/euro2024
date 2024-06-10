@@ -13,15 +13,18 @@ type PlayerResp struct {
 	Statistics []Statistics `json:"statistics"`
 }
 type Player struct {
-	FirstName   string `json:"firstname"`
-	LastName    string `json:"lastname"`
-	Age         int    `json:"age"`
-	Nationality string `json:"nationality"`
+	FirstName string `json:"firstname"`
+	LastName  string `json:"lastname"`
+	Age       int    `json:"age"`
 }
 type Statistics struct {
+	Team  Team  `json:"team"`
 	Shots Shots `json:"shots"`
 	Goals Goals `json:"goals"`
 	Cards Cards `json:"cards"`
+}
+type Team struct {
+	Name string `json:"name"`
 }
 type Shots struct {
 	Total int `json:"total"`

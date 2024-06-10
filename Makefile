@@ -8,14 +8,11 @@ player_fetcher:
 player_storer: delete deploy
 	@go build -o bin/player_storer ./player_storer
 	@./bin/player_storer
-receiver:
-	@go build -o bin/match_receiver ./match_receiver
-	@./bin/match_receiver
 match:
-	@go build -o bin/match ./matchservice
+	@go build -o bin/match ./matchservice/cmd
 	@./bin/match
 player:
-	@go build -o bin/player ./playerservice
+	@go build -o bin/player ./playerservice/cmd
 	@./bin/player
 gateway: 
 	@go build -o bin/gateway ./gateway
@@ -30,4 +27,4 @@ deploy:
 delete:
 	@aws cloudformation delete-stack --stack-name $(STACK_NAME)
 	@aws cloudformation wait stack-delete-complete --stack-name $(STACK_NAME)
-.PHONY: match_fetcher receiver match gateway player_fetcher player_storer player
+.PHONY: match_fetcher match gateway player_fetcher player_storer player

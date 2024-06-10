@@ -1,10 +1,12 @@
 package api
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/ficontini/euro2024/playerservice/service"
+	"github.com/ficontini/euro2024/playerservice/pkg/service"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type PlayerHandler struct {
@@ -17,12 +19,15 @@ func NewPlayerHandler(svc service.Service) *PlayerHandler {
 	}
 }
 func (h *PlayerHandler) HandleGetPlayersByTeam(c *fiber.Ctx) error {
+	requestID := uuid.NewString()
+	ctx := context.WithValue(c.Context(), "requestID", requestID)
 	param := c.Params("team")
 	team, err := validateTeamParameter(param)
 	if err != nil {
 		return ErrInvalidParam()
 	}
-	players, err := h.svc.GetPlayersByTeam(c.Context(), team)
+	fmt.Println("----!!!!", ctx.Value("requestID"))
+	players, err := h.svc.GetPlayersByTeam(ctx, team)
 	if err != nil {
 		return err
 	}

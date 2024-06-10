@@ -3,9 +3,9 @@ package transport
 import (
 	"context"
 
-	playerendpoint "github.com/ficontini/euro2024/playerservice/endpoint"
+	playerendpoint "github.com/ficontini/euro2024/playerservice/pkg/endpoint"
+	"github.com/ficontini/euro2024/playerservice/pkg/service"
 	"github.com/ficontini/euro2024/playerservice/proto"
-	"github.com/ficontini/euro2024/playerservice/service"
 	"github.com/go-kit/kit/endpoint"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	"google.golang.org/grpc"
