@@ -1,12 +1,12 @@
 STACK_NAME :=demo
 match_fetcher:
-	@go build -o bin/match_fetcher ./match_fetcher
+	@go build -o bin/match_fetcher ./matchfetcher
 	@./bin/match_fetcher
 player_fetcher:
-	@go build -o bin/player_fetcher ./player_fetcher
+	@go build -o bin/player_fetcher ./playerfetcher
 	@./bin/player_fetcher
 player_storer: delete deploy
-	@go build -o bin/player_storer ./player_storer
+	@go build -o bin/player_storer ./playerstorer
 	@./bin/player_storer
 match:
 	@go build -o bin/match ./matchservice/cmd

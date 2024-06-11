@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/ficontini/euro2024/player_storer/store"
+	"github.com/ficontini/euro2024/playerstorer/store"
 	"github.com/ficontini/euro2024/types"
 )
 

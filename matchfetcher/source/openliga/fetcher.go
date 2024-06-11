@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/ficontini/euro2024/match_fetcher/service"
+	"github.com/ficontini/euro2024/matchfetcher/service"
 )
 
 type APIFetcher struct {

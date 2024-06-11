@@ -28,9 +28,12 @@ func NewError(code int, err string) Error {
 		Err:  err,
 	}
 }
-func ErrInvalidParam() Error {
-	return NewError(http.StatusBadRequest, "invalid param")
+func ErrBadRequestCustomMessage(msg string) Error {
+	return NewError(http.StatusBadRequest, msg)
 }
 func ErrResourceNotFound(msg string) Error {
 	return NewError(http.StatusNotFound, msg)
+}
+func ErrBadRequest() Error {
+	return NewError(http.StatusBadRequest, "bad request")
 }

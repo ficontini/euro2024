@@ -35,7 +35,7 @@ func (h *MatchHandler) HandleGetMatchesByTeam(c *fiber.Ctx) error {
 	param := c.Params("team")
 	team, err := validateTeamParameter(param)
 	if err != nil {
-		return ErrInvalidParam()
+		return ErrBadRequestCustomMessage("invalid param")
 	}
 	matches, err := h.svc.GetMatchesByTeam(c.Context(), team)
 	if err != nil {

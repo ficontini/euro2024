@@ -14,12 +14,12 @@ Euro2024 is a microservice-based application developed in Go that provides real-
 ### Accessing the endpoints
 * Once all services are running, you can access the match data through the `gateway` service.
 * Endpoints:
-    - /api/v1/matches/live
-    - /api/v1/matches/upcoming
+    - /api/v1/match/live
+    - /api/v1/match/upcoming
     - /api/v1/team/:team/matches
     - /api/v1/team/:team/players
 ### Example request
 ```
-curl -X GET "http://localhost:8080/api/v1/matches/live"
+curl -X GET "http://localhost:8080/api/v1/match/live"
 ```
 

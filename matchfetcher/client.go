@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/ficontini/euro2024/match_fetcher/service"
+	"github.com/ficontini/euro2024/matchfetcher/service"
 	"github.com/ficontini/euro2024/types"
 	"github.com/gorilla/websocket"
 )

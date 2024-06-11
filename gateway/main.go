@@ -5,18 +5,15 @@ import (
 	"os"
 
 	"github.com/ficontini/euro2024/gateway/api"
+	"github.com/ficontini/euro2024/gateway/store"
 	"github.com/ficontini/euro2024/matchservice/pkg/transport"
 	playertransport "github.com/ficontini/euro2024/playerservice/pkg/transport"
 	"github.com/ficontini/euro2024/util"
 	"github.com/gofiber/fiber/v2"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
-	matchGrpcAddrEnvVar  = "GRPC_LISTENER"
-	playerGrpcAddrEnvVar = "PLAYER_GRPC_LISTENER"
-	listenAddrEnVar      = "GATEWAY_ADDR"
+	listenAddrEnVar = "GATEWAY_ADDR"
 )
 
 var config = fiber.Config{
@@ -24,30 +21,32 @@ var config = fiber.Config{
 }
 
 func main() {
-	matchServiceConn, err := newGRPCConnection(getEnv(matchGrpcAddrEnvVar))
+	cfg, err := NewConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer matchServiceConn.Close()
+	defer cfg.Close()
 
-	playerServiceConn, err := newGRPCConnection(getEnv(playerGrpcAddrEnvVar))
+	store, err := store.New()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer playerServiceConn.Close()
 
 	var (
-		listenAddr    = getEnv(listenAddrEnVar)
-		matchService  = transport.NewGRPCClient(matchServiceConn)
-		playerService = playertransport.NewGRPCClient(playerServiceConn)
+		listenAddr    = os.Getenv(listenAddrEnVar)
+		matchService  = transport.NewGRPCClient(cfg.MatchServiceConn)
+		playerService = playertransport.NewGRPCClient(cfg.PlayerServiceConn)
 		app           = fiber.New(config)
 		apiv1         = app.Group("/api/v1")
-		matches       = apiv1.Group("/matches")
+		users         = apiv1.Group("/user")
+		matches       = apiv1.Group("/match")
 		team          = apiv1.Group("/team")
+		userHandler   = api.NewUserHandler(store.User)
 		matchHandler  = api.NewMatchHandler(matchService)
 		playerHandler = api.NewPlayerHandler(playerService)
 	)
 
+	users.Post("/sign-up", userHandler.HandlePostUser)
 	matches.Get("/upcoming", matchHandler.HandleGetUpcomingMatches)
 	matches.Get("/live", matchHandler.HandleGetLiveMatches)
 	team.Get("/:team/matches", matchHandler.HandleGetMatchesByTeam)
@@ -57,18 +56,4 @@ func main() {
 
 func init() {
 	util.Load(".env")
-}
-func getEnv(key string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		log.Fatalf("env var %s not set", key)
-	}
-	return value
-}
-func newGRPCConnection(addr string) (*grpc.ClientConn, error) {
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
 }

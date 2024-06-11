@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/ficontini/euro2024/match_fetcher/service"
+	"github.com/ficontini/euro2024/matchfetcher/service"
 	"github.com/ficontini/euro2024/types"
 )
 

@@ -6,22 +6,23 @@ import (
 	"os"
 	"time"
 
-	"github.com/ficontini/euro2024/match_fetcher/service"
-	"github.com/ficontini/euro2024/match_fetcher/source/openliga"
+	"github.com/ficontini/euro2024/playerfetcher/service"
 	"github.com/joho/godotenv"
 )
 
 const (
+	api_key_env     = "API_KEY"
+	api_host_env    = "API_HOST"
 	ws_endpoint_env = "WS_ENDPOINT"
-	api_addr_env    = "OPENLIGA_ADDR"
+	interval        = 24 * time.Hour
 )
-
-var interval = 1 * time.Hour
 
 func main() {
 	var (
-		fetcher   = openliga.NewAPIFetcher(os.Getenv(api_addr_env))
-		processor = openliga.NewApiProcessor()
+		fetcher = service.NewAPIFetcher(
+			os.Getenv(api_host_env),
+			os.Getenv(api_key_env))
+		processor = service.NewAPIProcessor()
 		svc       = service.New(fetcher, processor)
 		endpoint  = os.Getenv(ws_endpoint_env)
 	)
@@ -30,8 +31,10 @@ func main() {
 		log.Fatal(err)
 	}
 	defer client.Close()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
 	for {
 		if err := client.SendMessage(ctx); err != nil {
 			log.Fatal(err)
@@ -40,6 +43,7 @@ func main() {
 	}
 
 }
+
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(err)

@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
-	"github.com/ficontini/euro2024/player_storer/store"
+	"github.com/ficontini/euro2024/playerstorer/store"
 	"github.com/joho/godotenv"
 )
 
