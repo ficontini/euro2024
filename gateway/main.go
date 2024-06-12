@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/ficontini/euro2024/gateway/api"
+	"github.com/ficontini/euro2024/gateway/service"
 	"github.com/ficontini/euro2024/gateway/store"
 	"github.com/ficontini/euro2024/matchservice/pkg/transport"
 	playertransport "github.com/ficontini/euro2024/playerservice/pkg/transport"
@@ -34,15 +35,16 @@ func main() {
 
 	var (
 		listenAddr     = os.Getenv(listenAddrEnVar)
-		authMiddleware = api.NewAuthMiddleware(store.Auth)
 		matchService   = transport.NewGRPCClient(cfg.MatchServiceConn)
 		playerService  = playertransport.NewGRPCClient(cfg.PlayerServiceConn)
+		userService    = service.NewUserService(store)
+		authMiddleware = api.NewAuthMiddleware(userService)
 		app            = fiber.New(config)
 		apiv1          = app.Group("/api/v1")
 		users          = apiv1.Group("/user")
 		matches        = apiv1.Group("/match", authMiddleware)
 		team           = apiv1.Group("/team", authMiddleware)
-		userHandler    = api.NewUserHandler(store)
+		userHandler    = api.NewUserHandler(userService)
 		matchHandler   = api.NewMatchHandler(matchService)
 		playerHandler  = api.NewPlayerHandler(playerService)
 	)
