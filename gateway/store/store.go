@@ -9,6 +9,7 @@ import (
 
 type Store struct {
 	User UserStorer
+	Auth AuthStorer
 }
 
 func New() (*Store, error) {
@@ -19,5 +20,6 @@ func New() (*Store, error) {
 	client := dynamodb.NewFromConfig(cfg)
 	return &Store{
 		User: NewDynamoDBUserStore(client),
+		Auth: NewDynamoDBAuthStore(client),
 	}, nil
 }

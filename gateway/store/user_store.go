@@ -11,10 +11,14 @@ import (
 	"github.com/ficontini/euro2024/types"
 )
 
-const table = "users"
+const (
+	userTable        = "users"
+	userPartitionKey = "email"
+)
 
 type UserStorer interface {
 	Insert(context.Context, *types.User) error
+	GetByEmail(context.Context, string) (*types.User, error)
 }
 
 type dynamoDBUserStore struct {
@@ -25,7 +29,7 @@ type dynamoDBUserStore struct {
 func NewDynamoDBUserStore(client *dynamodb.Client) UserStorer {
 	return &dynamoDBUserStore{
 		client: client,
-		table:  aws.String(table),
+		table:  aws.String(userTable),
 	}
 }
 func (s *dynamoDBUserStore) Insert(ctx context.Context, user *types.User) error {
@@ -43,6 +47,24 @@ func (s *dynamoDBUserStore) Insert(ctx context.Context, user *types.User) error 
 		return ErrEmailAlreadyInUse
 	}
 	return err
+}
+func (s *dynamoDBUserStore) GetByEmail(ctx context.Context, email string) (*types.User, error) {
+	key, err := attributevalue.Marshal(email)
+	if err != nil {
+		return nil, err
+	}
+	res, err := s.client.GetItem(ctx, &dynamodb.GetItemInput{
+		TableName: s.table,
+		Key:       map[string]dynamodbtypes.AttributeValue{userPartitionKey: key},
+	})
+	if err != nil {
+		return nil, err
+	}
+	var user *types.User
+	if err := attributevalue.UnmarshalMap(res.Item, &user); err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 var ErrEmailAlreadyInUse = errors.New("email already in use")

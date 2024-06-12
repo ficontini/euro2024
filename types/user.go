@@ -3,7 +3,9 @@ package types
 import (
 	"fmt"
 	"regexp"
+	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,13 +16,15 @@ const (
 	lastName       = "lastName"
 	password       = "password"
 	email          = "email"
+	interval       = time.Minute * 15
 )
 
 type User struct {
-	FirstName         string
-	LastName          string
-	Email             string
-	EncryptedPassword string
+	UserID            string `dynamodbav:"userID"`
+	FirstName         string `dynamodbav:"firstName"`
+	LastName          string `dynamodbav:"lastName"`
+	Email             string `dynamodbav:"email"`
+	EncryptedPassword string `dynamodbav:"encryptedPassword"`
 }
 
 func NewUserFromParams(params UserParams) (*User, error) {
@@ -29,13 +33,16 @@ func NewUserFromParams(params UserParams) (*User, error) {
 		return nil, err
 	}
 	return &User{
+		UserID:            uuid.NewString(),
 		FirstName:         params.FirstName,
 		LastName:          params.LastName,
 		Email:             params.Email,
 		EncryptedPassword: encpwd,
 	}, nil
 }
-
+func (u *User) IsPasswordValid(password string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(u.EncryptedPassword), []byte(password)) == nil
+}
 func generateEncryptedPassword(password string) (string, error) {
 	encpw, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -76,4 +83,43 @@ func isEmailValid(email string) bool {
 // TODO:
 func isPasswordValid(password string) bool {
 	return len(password) >= minPasswordLen
+}
+
+type Auth struct {
+	UserID         string `dynamodbav:"userID"`
+	AuthUUID       string `dynamodbav:"authUUID"`
+	ExpirationTime int64  `dynamodbav:"expirationTime"`
+}
+
+func NewAuth(userID string) *Auth {
+	return &Auth{
+		UserID:         userID,
+		AuthUUID:       uuid.NewString(),
+		ExpirationTime: time.Now().Add(interval).Unix(),
+	}
+}
+
+type AuthRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (r AuthRequest) Validate() map[string]string {
+	var errors = make(map[string]string)
+	if !isPasswordValid(r.Password) {
+		errors[password] = fmt.Sprintf("%s (%s) is invalid", password, r.Password)
+	}
+	if !isEmailValid(r.Email) {
+		errors[email] = fmt.Sprintf("%s (%s) is invalid", email, r.Email)
+	}
+	return errors
+}
+
+type AuthResponse struct {
+	Token string `json:"token"`
+}
+
+type AuthFilter struct {
+	UserID   string `dynamodbav:"userID"`
+	AuthUUID string `dynamodbav:"authUUID"`
 }

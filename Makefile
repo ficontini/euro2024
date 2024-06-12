@@ -1,4 +1,5 @@
 STACK_NAME :=demo
+TEMPLATE := cloudformation/template.yaml
 match_fetcher:
 	@go build -o bin/match_fetcher ./matchfetcher
 	@./bin/match_fetcher
@@ -22,7 +23,7 @@ test:
 proto:
 	@protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative playerservice/proto/*.proto
 deploy:
-	@aws cloudformation deploy --template-file cloudformation/template.yaml --stack-name $(STACK_NAME)
+	@aws cloudformation deploy --template-file $(TEMPLATE) --stack-name $(STACK_NAME)
 	@aws cloudformation wait stack-create-complete --stack-name $(STACK_NAME)
 delete:
 	@aws cloudformation delete-stack --stack-name $(STACK_NAME)

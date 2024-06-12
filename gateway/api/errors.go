@@ -37,3 +37,9 @@ func ErrResourceNotFound(msg string) Error {
 func ErrBadRequest() Error {
 	return NewError(http.StatusBadRequest, "bad request")
 }
+func ErrInvalidCredentials() Error {
+	return NewError(http.StatusUnauthorized, "invalid credentials")
+}
+func ErrUnAuthorized() Error {
+	return NewError(http.StatusUnauthorized, "unathorized request")
+}
