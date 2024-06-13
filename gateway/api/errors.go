@@ -10,8 +10,12 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 	if apiError, ok := err.(Error); ok {
 		return c.Status(apiError.Code).JSON(apiError)
 	}
+	if fiberError, ok := err.(*fiber.Error); ok {
+		apiError := NewError(fiberError.Code, fiberError.Message)
+		return c.Status(apiError.Code).JSON(apiError)
+	}
 	apiError := NewError(http.StatusInternalServerError, err.Error())
-	return c.Status(apiError.Code).JSON(apiError.Error())
+	return c.Status(apiError.Code).JSON(apiError)
 }
 
 type Error struct {
