@@ -16,10 +16,11 @@ message Response{
 message Player{
     string firstName = 1; 
     string lastName = 2; 
-    int32 age = 3; 
-    int32 shots = 4; 
-    int32 goals = 5; 
-    int32 assists = 6; 
-    int32 yellowCards = 7; 
-    int32 redCards = 8; 
+    int64 age = 3; 
+    string position = 4; 
+    int64 goals = 5; 
+    int64 assists = 6; 
+    int64 passAccuracy = 7;
+    int64 yellowCards = 8; 
+    int64 redCards = 9; 
 }

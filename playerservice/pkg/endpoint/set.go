@@ -27,12 +27,13 @@ func (s Set) GetPlayersByTeam(ctx context.Context, team string) ([]*types.Player
 
 	var players []*types.Player
 	for _, p := range response.Players {
-		performace := types.NewPerformance(p.Shots, p.Goals, p.Assists)
+		performace := types.NewPerformance(p.Goals, p.Assists, p.PassAccuracy)
 		cards := types.NewCards(p.YellowCards, p.RedCards)
 		player := types.NewPlayer(
 			p.FirstName,
 			p.LastName,
 			team,
+			p.Position,
 			p.Age,
 			types.NewStatistics(
 				performace,
@@ -69,25 +70,27 @@ type Response struct {
 	Players []Player
 }
 type Player struct {
-	FirstName   string
-	LastName    string
-	Age         int
-	Shots       int
-	Goals       int
-	Assists     int
-	YellowCards int
-	RedCards    int
+	FirstName    string
+	LastName     string
+	Age          int
+	Position     string
+	Goals        int
+	Assists      int
+	PassAccuracy int
+	YellowCards  int
+	RedCards     int
 }
 
 func makeResponse(player *types.Player) Player {
 	return Player{
-		FirstName:   player.FirstName,
-		LastName:    player.LastName,
-		Age:         player.Age,
-		Shots:       player.Shots,
-		Goals:       player.Goals,
-		Assists:     player.Assists,
-		YellowCards: player.YellowCards,
-		RedCards:    player.RedCards,
+		FirstName:    player.FirstName,
+		LastName:     player.LastName,
+		Age:          player.Age,
+		Position:     player.Position,
+		Goals:        player.Goals,
+		Assists:      player.Assists,
+		PassAccuracy: player.PassAccuracy,
+		YellowCards:  player.YellowCards,
+		RedCards:     player.RedCards,
 	}
 }

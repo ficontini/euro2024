@@ -1,28 +1,30 @@
 package types
 
 type Player struct {
-	FirstName   string `json:"firstName" dynamodbav:"firstName"`
-	LastName    string `json:"lastName" dynamodbav:"lastName"`
-	Team        string `json:"team" dynamodbav:"team"`
-	Age         int    `json:"age" dynamodbav:"age"`
-	Shots       int    `json:"shots" dynamodbav:"shots"`
-	Goals       int    `json:"goals" dynamodbav:"goals"`
-	Assists     int    `json:"assists" dynamodbav:"assists"`
-	YellowCards int    `json:"yellowCards" dynamodbav:"yellowCards"`
-	RedCards    int    `json:"redCards" dynamodbav:"redCards"`
+	FirstName    string `json:"firstName" dynamodbav:"firstName"`
+	LastName     string `json:"lastName" dynamodbav:"lastName"`
+	Team         string `json:"team" dynamodbav:"team"`
+	Age          int    `json:"age" dynamodbav:"age"`
+	Position     string `json:"position"`
+	Goals        int    `json:"goals" dynamodbav:"goals"`
+	Assists      int    `json:"assists" dynamodbav:"assists"`
+	PassAccuracy int    `json:"passAccuracy"`
+	YellowCards  int    `json:"yellowCards" dynamodbav:"yellowCards"`
+	RedCards     int    `json:"redCards" dynamodbav:"redCards"`
 }
 
-func NewPlayer(firstName, lastName, team string, age int, statistics *Statistics) *Player {
+func NewPlayer(firstName, lastName, team, position string, age int, statistics *Statistics) *Player {
 	return &Player{
-		FirstName:   firstName,
-		LastName:    lastName,
-		Team:        team,
-		Age:         age,
-		Shots:       statistics.Performance.Shots,
-		Goals:       statistics.Performance.Goals,
-		Assists:     statistics.Performance.Assists,
-		YellowCards: statistics.Cards.Yellow,
-		RedCards:    statistics.Cards.Red,
+		FirstName:    firstName,
+		LastName:     lastName,
+		Team:         team,
+		Age:          age,
+		Position:     position,
+		PassAccuracy: statistics.Performance.PassAccuracy,
+		Goals:        statistics.Performance.Goals,
+		Assists:      statistics.Performance.Assists,
+		YellowCards:  statistics.Cards.Yellow,
+		RedCards:     statistics.Cards.Red,
 	}
 }
 
@@ -39,16 +41,16 @@ func NewStatistics(performance *Performance, cards *Cards) *Statistics {
 }
 
 type Performance struct {
-	Shots   int
-	Goals   int
-	Assists int
+	Goals        int
+	Assists      int
+	PassAccuracy int
 }
 
-func NewPerformance(shots, goals, assists int) *Performance {
+func NewPerformance(goals, assists, accuracy int) *Performance {
 	return &Performance{
-		Shots:   shots,
-		Goals:   goals,
-		Assists: assists,
+		Goals:        goals,
+		Assists:      assists,
+		PassAccuracy: accuracy,
 	}
 }
 

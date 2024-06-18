@@ -37,14 +37,21 @@ func newPlayer(r PlayerResp) *types.Player {
 		player.FirstName,
 		player.LastName,
 		statistics.Team.Name,
+		statistics.Games.Position,
 		player.Age,
 		performace,
 	)
 }
 func newPerfomance(s Statistics) *types.Statistics {
-	var (
-		cards       = types.NewCards(s.Cards.Yellow, s.Cards.Red)
-		performance = types.NewPerformance(s.Shots.Total, s.Goals.Total, s.Goals.Assists)
-	)
+	cards := types.NewCards(s.Cards.Yellow, s.Cards.Red)
+	accuracy := calculateAccuracy(s.Passes)
+	performance := types.NewPerformance(s.Goals.Total, s.Goals.Assists, accuracy)
 	return types.NewStatistics(performance, cards)
+}
+
+func calculateAccuracy(passes Passes) int {
+	if passes.Total == 0 {
+		return 0
+	}
+	return (passes.Accuracy / passes.Total) * 100
 }

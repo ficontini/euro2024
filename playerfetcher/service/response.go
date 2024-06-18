@@ -18,17 +18,19 @@ type Player struct {
 	Age       int    `json:"age"`
 }
 type Statistics struct {
-	Team  Team  `json:"team"`
-	Shots Shots `json:"shots"`
-	Goals Goals `json:"goals"`
-	Cards Cards `json:"cards"`
+	Team   Team   `json:"team"`
+	Games  Games  `json:"games"`
+	Goals  Goals  `json:"goals"`
+	Cards  Cards  `json:"cards"`
+	Passes Passes `json:"passes"`
+}
+type Games struct {
+	Position string `json:"position"`
 }
 type Team struct {
 	Name string `json:"name"`
 }
-type Shots struct {
-	Total int `json:"total"`
-}
+
 type Goals struct {
 	Total   int `json:"total"`
 	Assists int `json:"assists"`
@@ -36,4 +38,9 @@ type Goals struct {
 type Cards struct {
 	Yellow int `json:"yellow"`
 	Red    int `json:"red"`
+}
+
+type Passes struct {
+	Total    int `json:"total"`
+	Accuracy int `json:"accuracy"`
 }

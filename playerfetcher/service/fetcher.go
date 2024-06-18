@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 const path = "v3/players?league=4&season=2024"
@@ -38,11 +39,14 @@ func (f *APIFetcher) FetchData() ([]*ApiResponse, error) {
 		}
 		total = res.Paging.Total
 		response = append(response, res)
+		time.Sleep(6 * time.Second)
 	}
+	fmt.Println("len:", len(response))
 	return response, nil
 }
 
 func (f *APIFetcher) fetch(page int) (*ApiResponse, error) {
+	fmt.Println("page:", page)
 	req, err := f.newRequest(page)
 	if err != nil {
 		return nil, err
@@ -53,7 +57,7 @@ func (f *APIFetcher) fetch(page int) (*ApiResponse, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-
+	fmt.Println(resp.StatusCode)
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("api request failed")
 	}

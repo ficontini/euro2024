@@ -12,6 +12,7 @@ import (
 
 const (
 	layout           = "2006-01-02T15:04:05"
+	layoutUTC        = "2006-01-02T15:04:05Z"
 	translation_file = "translations.json"
 )
 
@@ -35,6 +36,10 @@ func (p *APIProcessor) ProcessData(data any) ([]*types.Match, error) {
 	resp := data.([]*Match)
 	var matches []*types.Match
 	for _, r := range resp {
+		dateUTC, err := time.Parse(layoutUTC, r.DateUTC)
+		if err != nil {
+			return nil, err
+		}
 		date, err := time.Parse(layout, r.Date)
 		if err != nil {
 			return nil, err
@@ -45,7 +50,7 @@ func (p *APIProcessor) ProcessData(data any) ([]*types.Match, error) {
 			types.NewLocation(r.Location.City, r.Location.Stadium),
 			types.NewMatchTeam(p.translateTeamName(r.Team1.Name), result.Team1),
 			types.NewMatchTeam(p.translateTeamName(r.Team2.Name), result.Team2),
-			calculateState(date, r.IsFinished),
+			calculateState(dateUTC.UTC(), r.IsFinished),
 		)
 		matches = append(matches, match)
 	}
@@ -59,8 +64,7 @@ func (p *APIProcessor) translateTeamName(name string) string {
 }
 
 func calculateState(date time.Time, isFinished bool) types.MatchStatus {
-	now := time.Now()
-
+	now := time.Now().UTC()
 	if date.After(now) {
 		return types.NS
 	}
