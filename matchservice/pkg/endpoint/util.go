@@ -77,8 +77,8 @@ func makeResponse(matches []*types.Match) MatchResponse {
 		response = append(response, Match{
 			Date: match.Date,
 			Location: Location{
-				match.Location.Stadium,
 				match.Location.City,
+				match.Location.Stadium,
 			},
 			Status: match.Status,
 			Home: Team{

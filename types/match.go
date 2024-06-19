@@ -36,8 +36,8 @@ func (m *Match) IsUpcoming() bool {
 }
 
 type Location struct {
-	City    string `json:"city"`
-	Stadium string `json:"stadium"`
+	City    string `json:"city,omitempty"`
+	Stadium string `json:"stadium,omitempty"`
 }
 
 func NewLocation(city, stadium string) *Location {

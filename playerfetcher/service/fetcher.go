@@ -9,7 +9,10 @@ import (
 	"time"
 )
 
-const path = "v3/players?league=4&season=2024"
+const (
+	path   = "v3/players?league=4&season=2024"
+	apiURL = "https://%s/%s&page"
+)
 
 type Fetcher interface {
 	FetchData() ([]*ApiResponse, error)
@@ -24,7 +27,7 @@ func NewAPIFetcher(apiHost, apiKey string) Fetcher {
 	return &APIFetcher{
 		APIHost: apiHost,
 		APIKey:  apiKey,
-		url:     fmt.Sprintf("https://%s/%s&page", apiHost, path),
+		url:     fmt.Sprintf(apiURL, apiHost, path),
 	}
 }
 func (f *APIFetcher) FetchData() ([]*ApiResponse, error) {

@@ -19,11 +19,14 @@ const (
 var interval = 1 * time.Hour
 
 func main() {
+	processor, err := openliga.NewApiProcessor()
+	if err != nil {
+		log.Fatal(err)
+	}
 	var (
-		fetcher   = openliga.NewAPIFetcher(os.Getenv(api_addr_env))
-		processor = openliga.NewApiProcessor()
-		svc       = service.New(fetcher, processor)
-		endpoint  = os.Getenv(ws_endpoint_env)
+		fetcher  = openliga.NewAPIFetcher(os.Getenv(api_addr_env))
+		svc      = service.New(fetcher, processor)
+		endpoint = os.Getenv(ws_endpoint_env)
 	)
 	client, err := NewWebSocketClient(endpoint, svc)
 	if err != nil {
