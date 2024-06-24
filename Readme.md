@@ -23,6 +23,6 @@ Euro2024 is a microservice-based application developed in Go that provides real-
     - /api/v1/team/:team/players
 ### Example request
 ```
-curl -X GET "http://localhost:8080/api/v1/match/live"
+curl -X GET "http://localhost:8080/api/v1/match/live" -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 

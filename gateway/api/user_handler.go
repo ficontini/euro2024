@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/ficontini/euro2024/gateway/service"
@@ -48,6 +49,10 @@ func (h *UserHandler) HandleAuthenticate(c *fiber.Ctx) error {
 	if err != nil {
 		return ErrInvalidCredentials()
 	}
+	if len(token.Token) == 0 {
+		return ErrInvalidCredentials()
+	}
+	fmt.Println("token", token)
 
 	return c.JSON(token)
 }

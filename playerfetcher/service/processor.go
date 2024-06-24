@@ -27,12 +27,12 @@ func (p *APIProcessor) processApiResponse(resp []PlayerResp) {
 		p.players = append(p.players, newPlayer(r))
 	}
 }
+
 func newPlayer(r PlayerResp) *types.Player {
-	var (
-		statistics = r.Statistics[0]
-		performace = newPerfomance(statistics)
-		player     = r.Player
-	)
+	statistics := r.Statistics[0]
+	performace := newPerfomance(statistics)
+	player := r.Player
+
 	return types.NewPlayer(
 		player.FirstName,
 		player.LastName,

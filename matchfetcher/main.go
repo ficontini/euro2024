@@ -24,7 +24,7 @@ func main() {
 		log.Fatal(err)
 	}
 	var (
-		fetcher  = openliga.NewAPIFetcher(os.Getenv(api_addr_env))
+		fetcher  = openliga.NewAPIFetcher(os.Getenv(api_addr_env), nil)
 		svc      = service.New(fetcher, processor)
 		endpoint = os.Getenv(ws_endpoint_env)
 	)
@@ -43,6 +43,7 @@ func main() {
 	}
 
 }
+
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(err)

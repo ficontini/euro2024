@@ -48,6 +48,7 @@ func main() {
 		matchHandler   = api.NewMatchHandler(matchService)
 		playerHandler  = api.NewPlayerHandler(playerService)
 	)
+
 	users.Post("/sign-up", userHandler.HandlePostUser)
 	users.Post("/sign-in", userHandler.HandleAuthenticate)
 	users.Post("/sign-out", authMiddleware, userHandler.HandlePostSignOut)
@@ -59,5 +60,7 @@ func main() {
 }
 
 func init() {
-	util.Load(".env")
+	if err := util.Load(); err != nil {
+		log.Fatal(err)
+	}
 }

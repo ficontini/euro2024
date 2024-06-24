@@ -17,13 +17,18 @@ const lastPage = 7
 
 type APIFetcher struct {
 	APIHost string
+	client  *http.Client
 	errch   chan error
 	matchch chan []*Match
 }
 
-func NewAPIFetcher(apiHost string) service.Fetcher {
+func NewAPIFetcher(apiHost string, client *http.Client) service.Fetcher {
+	if client == nil {
+		client = http.DefaultClient
+	}
 	return &APIFetcher{
 		APIHost: apiHost,
+		client:  client,
 		errch:   make(chan error, lastPage),
 		matchch: make(chan []*Match, lastPage),
 	}
@@ -35,7 +40,10 @@ func (f *APIFetcher) FetchData() (any, error) {
 	for i := 1; i <= lastPage; i++ {
 		go func(page int) {
 			resp, err := f.makeRequest(fmt.Sprintf("%s/%v", f.APIHost, page))
-			f.errch <- err
+			if err != nil {
+				f.errch <- err
+				return
+			}
 			f.matchch <- resp
 			wg.Done()
 		}(i)
@@ -64,11 +72,8 @@ func (f *APIFetcher) makeRequest(url string) ([]*Match, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := f.client.Do(req)
 	if err != nil {
-		if ctx.Err() == context.DeadlineExceeded {
-			return nil, errors.New("request time out")
-		}
 		return nil, err
 	}
 	defer resp.Body.Close()

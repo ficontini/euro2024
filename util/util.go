@@ -8,11 +8,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func Load(envFile string) {
-	err := godotenv.Load(dir(envFile))
-	if err != nil {
-		panic(fmt.Errorf("error loading .env file: %w", err))
-	}
+const envFile = ".env"
+
+func Load() error {
+	return godotenv.Load(dir(envFile))
 }
 
 func dir(envFile string) string {

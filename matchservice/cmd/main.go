@@ -83,5 +83,7 @@ func main() {
 
 }
 func init() {
-	util.Load(".env")
+	if err := util.Load(); err != nil {
+		log.Fatal(err)
+	}
 }

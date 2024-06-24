@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"sort"
 	"sync"
 
 	"github.com/ficontini/euro2024/types"
@@ -15,15 +16,13 @@ type Store interface {
 }
 
 type InMemoryStore struct {
-	mu            sync.RWMutex
-	matches       []*types.Match
-	matchesByTeam map[string][]*types.Match
+	mu      sync.RWMutex
+	matches []*types.Match
 }
 
 func NewInMemoryStore() Store {
 	return &InMemoryStore{
-		matchesByTeam: make(map[string][]*types.Match),
-		matches:       []*types.Match{},
+		matches: []*types.Match{},
 	}
 
 }
@@ -32,26 +31,38 @@ func (s *InMemoryStore) Add(_ context.Context, match *types.Match) error {
 	defer s.mu.Unlock()
 
 	s.matches = append(s.matches, match)
-
-	s.matchesByTeam[match.Home.Name] = append(s.matchesByTeam[match.Home.Name], match)
-	s.matchesByTeam[match.Away.Name] = append(s.matchesByTeam[match.Away.Name], match)
+	sort.Slice(s.matches, func(i, j int) bool {
+		return s.matches[i].Date.Before(s.matches[j].Date)
+	})
 
 	return nil
 }
 func (s *InMemoryStore) Get(_ context.Context) ([]*types.Match, error) {
-	return s.matches, nil
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	matches := make([]*types.Match, len(s.matches))
+
+	copy(matches, s.matches)
+
+	return matches, nil
 }
 func (s *InMemoryStore) GetMatchesByTeam(_ context.Context, team string) ([]*types.Match, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return s.matchesByTeam[team], nil
+	var matches []*types.Match
+	for _, m := range s.matches {
+		if m.Home.Name == team || m.Away.Name == team {
+			matches = append(matches, m)
+		}
+	}
+	return matches, nil
 }
 func (s *InMemoryStore) Clean(_ context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	s.matches = []*types.Match{}
-	s.matchesByTeam = make(map[string][]*types.Match)
 
 	return nil
 }

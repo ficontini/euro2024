@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/ficontini/euro2024/playerfetcher/service"
-	"github.com/joho/godotenv"
+	"github.com/ficontini/euro2024/util"
 )
 
 const (
@@ -45,7 +45,7 @@ func main() {
 }
 
 func init() {
-	if err := godotenv.Load(); err != nil {
+	if err := util.Load(); err != nil {
 		log.Fatal(err)
 	}
 }

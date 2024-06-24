@@ -67,16 +67,16 @@ func (c *sqsConsumer) consumeMessage(ctx context.Context) error {
 		}
 		if err := c.processMessage(ctx, player); err != nil {
 			log.Println("error processing data: ", err)
-		}
-		//TODO: REVIEW
-		_, err = c.client.DeleteMessage(ctx, &sqs.DeleteMessageInput{
-			QueueUrl:      &c.queueURL,
-			ReceiptHandle: msg.ReceiptHandle,
-		})
-		if err != nil {
-			log.Println("Error deleting message:", err)
-		}
+		} else {
+			_, err = c.client.DeleteMessage(ctx, &sqs.DeleteMessageInput{
+				QueueUrl:      &c.queueURL,
+				ReceiptHandle: msg.ReceiptHandle,
+			})
 
+			if err != nil {
+				log.Println("Error deleting message:", err)
+			}
+		}
 	}
 	return nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -11,12 +12,17 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/ficontini/euro2024/playerstorer/store"
-	"github.com/joho/godotenv"
+	"github.com/ficontini/euro2024/util"
 )
 
-const queue_url_env = "PLAYER_QUEUE_URL"
+const queueUrlEnvVar = "PLAYER_QUEUE_URL"
+
+var queueURL string
 
 func main() {
+	if err := Init(); err != nil {
+		log.Fatal(err)
+	}
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal(err)
@@ -26,7 +32,7 @@ func main() {
 		dynamodbClient = dynamodb.NewFromConfig(cfg)
 		store          = store.NewDynamoDBStore(dynamodbClient)
 		svc            = New(store)
-		consumer       = NewSQSConsumer(sqsClient, os.Getenv(queue_url_env), svc)
+		consumer       = NewSQSConsumer(sqsClient, queueURL, svc)
 	)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -40,8 +46,13 @@ func main() {
 	consumer.Stop(ctx)
 }
 
-func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
+func Init() error {
+	if err := util.Load(); err != nil {
+		return err
 	}
+	queueURL = os.Getenv(os.Getenv(queueUrlEnvVar))
+	if queueURL == "" {
+		return fmt.Errorf("error loading the var: %s", queueUrlEnvVar)
+	}
+	return nil
 }
