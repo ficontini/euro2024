@@ -39,6 +39,12 @@ func NewHTTPHandler(endpoints matchendpoint.Set) http.Handler {
 		encodeHTTPGenericResponse,
 		options...,
 	))
+	m.Handle("/matches/final/winner", httptransport.NewServer(
+		endpoints.GetEuroWinnerEndpoint,
+		decodeHTTPRequest,
+		encodeHTTPGenericResponse,
+		options...,
+	))
 	return m
 }
 
@@ -48,6 +54,7 @@ func NewHTTPClient(instance string) (service.Service, error) {
 		upcomingEndpoint endpoint.Endpoint
 		liveEndpoint     endpoint.Endpoint
 		teamEndpoint     endpoint.Endpoint
+		winnerEndpoint   endpoint.Endpoint
 	)
 	if !strings.HasPrefix(instance, "http") {
 		instance = "http://" + instance
@@ -78,11 +85,19 @@ func NewHTTPClient(instance string) (service.Service, error) {
 			decodeHTTPUpcomingResponse,
 			options...,
 		).Endpoint()
+		winnerEndpoint = httptransport.NewClient(
+			http.MethodGet,
+			copyURL(u, "/matches/final/winner"),
+			encodeHTTPGenericRequest,
+			decodeHTTPWinnerReponse,
+			options...,
+		).Endpoint()
 	}
 	return matchendpoint.Set{
 		GetUpcomingMatchesEndpoint: upcomingEndpoint,
 		GetLiveMatchesEndpoint:     liveEndpoint,
 		GetMatchesByTeamEndpoint:   teamEndpoint,
+		GetEuroWinnerEndpoint:      winnerEndpoint,
 	}, nil
 }
 
@@ -122,6 +137,14 @@ func decodeHTTPUpcomingResponse(_ context.Context, r *http.Response) (interface{
 		return nil, errors.New(r.Status)
 	}
 	var resp matchendpoint.MatchResponse
+	err := json.NewDecoder(r.Body).Decode(&resp)
+	return resp, err
+}
+func decodeHTTPWinnerReponse(_ context.Context, r *http.Response) (interface{}, error) {
+	if r.StatusCode != http.StatusOK {
+		return nil, errors.New(r.Status)
+	}
+	var resp matchendpoint.WinnerResponse
 	err := json.NewDecoder(r.Body).Decode(&resp)
 	return resp, err
 }

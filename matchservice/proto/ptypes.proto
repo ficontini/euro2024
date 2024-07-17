@@ -8,9 +8,11 @@ service Matches{
     rpc GetUpcoming(MatchRequest) returns (MatchResponse){}
     rpc GetLive(MatchRequest) returns (MatchResponse){}
     rpc GetByTeam(TeamRequest) returns (MatchResponse) {}
+    rpc GetEuroWinner (WinnerRequest) returns (WinnerResponse) {}
 }
 
 message MatchRequest {}
+message WinnerRequest {}
 
 message TeamRequest{
     string name = 1; 
@@ -19,12 +21,17 @@ message TeamRequest{
 message MatchResponse{
     repeated Match matches = 1; 
 }
+message WinnerResponse{
+    string team = 1; 
+    Match final = 2; 
+}
 message Match{
     Team home = 1; 
     Team away = 2; 
     google.protobuf.Timestamp date = 3;
     string status = 4; 
     Location location = 5; 
+    string round = 6; 
 }
 message Location{
     string city = 1; 

@@ -2,6 +2,7 @@ package apifotball
 
 import (
 	"github.com/ficontini/euro2024/matchfetcher/service"
+	util "github.com/ficontini/euro2024/matchfetcher/source"
 	"github.com/ficontini/euro2024/types"
 )
 
@@ -27,6 +28,7 @@ func (p *APIProcessor) ProcessData(data any) ([]*types.Match, error) {
 			types.NewMatchTeam(m.Teams.Home.Name, m.Goals.Home),
 			types.NewMatchTeam(m.Teams.Away.Name, m.Goals.Away),
 			processStatus(m.Fixture.Status),
+			util.GetRound(m.League.Round),
 		)
 		matches = append(matches, match)
 	}

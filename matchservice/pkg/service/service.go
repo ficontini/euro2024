@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/ficontini/euro2024/matchservice/store"
@@ -13,6 +14,7 @@ type Service interface {
 	GetUpcomingMatches(context.Context) ([]*types.Match, error)
 	GetLiveMatches(context.Context) ([]*types.Match, error)
 	GetMatchesByTeam(context.Context, string) ([]*types.Match, error)
+	GetEuroWinner(context.Context) (*types.Match, error)
 }
 
 type basicService struct {
@@ -71,4 +73,15 @@ func (svc *basicService) GetLiveMatches(ctx context.Context) ([]*types.Match, er
 }
 func (svc *basicService) GetMatchesByTeam(ctx context.Context, team string) ([]*types.Match, error) {
 	return svc.store.GetMatchesByTeam(ctx, team)
+}
+
+func (svc *basicService) GetEuroWinner(ctx context.Context) (*types.Match, error) {
+	matches, err := svc.store.GetMatchesByRound(ctx, types.FINAL)
+	if err != nil {
+		return nil, err
+	}
+	if len(matches) == 0 {
+		return nil, fmt.Errorf("euro winner not found")
+	}
+	return matches[0], nil
 }

@@ -15,6 +15,7 @@ type grpcServer struct {
 	getUpcoming grpctransport.Handler
 	getLive     grpctransport.Handler
 	getByTeam   grpctransport.Handler
+	getWinner   grpctransport.Handler
 	proto.UnimplementedMatchesServer
 }
 
@@ -39,6 +40,13 @@ func (s *grpcServer) GetByTeam(ctx context.Context, req *proto.TeamRequest) (*pr
 	}
 	return rep.(*proto.MatchResponse), nil
 }
+func (s *grpcServer) GetEuroWinner(ctx context.Context, req *proto.WinnerRequest) (*proto.WinnerResponse, error) {
+	_, rep, err := s.getWinner.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*proto.WinnerResponse), nil
+}
 
 func NewGRPCServer(endpoints matchendpoint.Set) proto.MatchesServer {
 	options := []grpctransport.ServerOption{}
@@ -61,6 +69,12 @@ func NewGRPCServer(endpoints matchendpoint.Set) proto.MatchesServer {
 			encodeGRPCResp,
 			options...,
 		),
+		getWinner: grpctransport.NewServer(
+			endpoints.GetEuroWinnerEndpoint,
+			decodeGRPCReq,
+			encodeGRPCWinnerResp,
+			options...,
+		),
 	}
 }
 func NewGRPCClient(conn *grpc.ClientConn) service.Service {
@@ -69,6 +83,7 @@ func NewGRPCClient(conn *grpc.ClientConn) service.Service {
 		getUpcomingEndpoint endpoint.Endpoint
 		getLiveEndpoint     endpoint.Endpoint
 		getByTeamEndpoint   endpoint.Endpoint
+		getWinnerEndpoint   endpoint.Endpoint
 	)
 	{
 		getUpcomingEndpoint = grpctransport.NewClient(
@@ -98,12 +113,22 @@ func NewGRPCClient(conn *grpc.ClientConn) service.Service {
 			proto.MatchResponse{},
 			options...,
 		).Endpoint()
+		getWinnerEndpoint = grpctransport.NewClient(
+			conn,
+			"Matches",
+			"GetEuroWinner",
+			encodeGRCPEmptyRequest,
+			decodeGRPCWinnerResponse,
+			proto.WinnerResponse{},
+			options...,
+		).Endpoint()
 
 	}
 	return matchendpoint.Set{
 		GetUpcomingMatchesEndpoint: getUpcomingEndpoint,
 		GetLiveMatchesEndpoint:     getLiveEndpoint,
 		GetMatchesByTeamEndpoint:   getByTeamEndpoint,
+		GetEuroWinnerEndpoint:      getWinnerEndpoint,
 	}
 
 }
@@ -119,9 +144,16 @@ func encodeGRPCResp(_ context.Context, resp interface{}) (interface{}, error) {
 	return matchendpoint.NewProtoMatchResponseFromMatchResponse(response), nil
 
 }
+func encodeGRPCWinnerResp(_ context.Context, resp interface{}) (interface{}, error) {
+	response := resp.(matchendpoint.WinnerResponse)
+	return matchendpoint.NewProtoWinnerResponseFromWinnerResponse(response), nil
+}
 
 func encodeGRPRequest(context.Context, interface{}) (request interface{}, err error) {
 	return &proto.MatchRequest{}, nil
+}
+func encodeGRCPEmptyRequest(context.Context, interface{}) (request interface{}, err error) {
+	return &proto.WinnerRequest{}, nil
 }
 func encodeGRPTeamRequest(_ context.Context, req interface{}) (interface{}, error) {
 	request := req.(*matchendpoint.TeamRequest)
@@ -132,4 +164,8 @@ func encodeGRPTeamRequest(_ context.Context, req interface{}) (interface{}, erro
 func decodeGRPResponse(_ context.Context, resp interface{}) (interface{}, error) {
 	response := resp.(*proto.MatchResponse)
 	return matchendpoint.NewMatchResponseFromProtoMatchResponse(response), nil
+}
+func decodeGRPCWinnerResponse(_ context.Context, resp interface{}) (interface{}, error) {
+	response := resp.(*proto.WinnerResponse)
+	return matchendpoint.NewWinnerResponseFromProtoWinnerResponse(response), nil
 }

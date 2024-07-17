@@ -7,6 +7,7 @@ type APIResponse struct {
 }
 type Match struct {
 	Fixture Fixture `json:"fixture"`
+	League  League  `json:"league"`
 	Teams   Teams   `json:"teams"`
 	Goals
 }
@@ -14,6 +15,9 @@ type Fixture struct {
 	Date   time.Time `json:"date"`
 	Venue  Venue     `json:"venue"`
 	Status Status    `json:"status"`
+}
+type League struct {
+	Round string `json:"round"`
 }
 type Venue struct {
 	Name string `json:"name"`

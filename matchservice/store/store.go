@@ -12,6 +12,7 @@ type Store interface {
 	Add(context.Context, *types.Match) error
 	Get(context.Context) ([]*types.Match, error)
 	GetMatchesByTeam(context.Context, string) ([]*types.Match, error)
+	GetMatchesByRound(context.Context, types.RoundStatus) ([]*types.Match, error)
 	Clean(context.Context) error
 }
 
@@ -53,6 +54,17 @@ func (s *InMemoryStore) GetMatchesByTeam(_ context.Context, team string) ([]*typ
 	var matches []*types.Match
 	for _, m := range s.matches {
 		if m.Home.Name == team || m.Away.Name == team {
+			matches = append(matches, m)
+		}
+	}
+	return matches, nil
+}
+func (s *InMemoryStore) GetMatchesByRound(_ context.Context, round types.RoundStatus) ([]*types.Match, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	var matches []*types.Match
+	for _, m := range s.matches {
+		if m.Round == round {
 			matches = append(matches, m)
 		}
 	}

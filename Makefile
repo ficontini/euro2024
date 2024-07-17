@@ -21,7 +21,7 @@ gateway:
 test: 
 	@go test -v ./... --count=1
 proto:
-	@protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative playerservice/proto/*.proto
+	@protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative matchservice/proto/*.proto
 deploy:
 	@aws cloudformation deploy --template-file $(TEMPLATE) --stack-name $(STACK_NAME)
 	@aws cloudformation wait stack-create-complete --stack-name $(STACK_NAME)

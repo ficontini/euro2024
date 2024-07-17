@@ -26,6 +26,12 @@ func main() {
 	for _, m := range matches {
 		fmt.Printf("%+v\n", m)
 	}
+	winner, err := svc.GetEuroWinner(context.Background())
+	if err != nil {
+		fmt.Println("euro winnner not found")
+		log.Fatal(err)
+	}
+	fmt.Println("winner: ", winner)
 
 	go func() {
 		conn, err := grpc.NewClient(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -48,5 +54,11 @@ func main() {
 		for _, m := range matches {
 			fmt.Printf("%+v\n", m)
 		}
+		winner, err = svc.GetEuroWinner(context.Background())
+		if err != nil {
+			fmt.Println("grpc euro winnner not found")
+			log.Fatal(err)
+		}
+		fmt.Println("grpc winner: ", winner)
 	}()
 }

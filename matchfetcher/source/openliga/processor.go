@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/ficontini/euro2024/matchfetcher/service"
+	util "github.com/ficontini/euro2024/matchfetcher/source"
 	"github.com/ficontini/euro2024/types"
 )
 
@@ -58,13 +59,13 @@ func (p *APIProcessor) newMatch(m *Match) (*types.Match, error) {
 	away := types.NewMatchTeam(p.translator.Get(m.Team2.Name), result.Team2)
 
 	status := calculateStatus(dateUTC.UTC(), m.IsFinished)
-
 	return types.NewMatch(
 		date,
 		location,
 		home,
 		away,
 		status,
+		util.GetRound(p.translator.Get(m.Group.Name)),
 	), nil
 
 }

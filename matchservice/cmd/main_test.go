@@ -85,7 +85,7 @@ func TestGetNoLiveMatches(t *testing.T) {
 func TestGetUpcomingMatches(t *testing.T) {
 	var (
 		store    = store.NewInMemoryStore()
-		finished = newFinishedMatch(store, "Portugal", "Czech Republic")
+		finished = newFinishedMatch(store, "Portugal", "Czech Republic", types.GROUPS)
 		live     = newLiveMatch(store, "France", "Turkey")
 	)
 	{
@@ -121,8 +121,8 @@ func TestGetNoUpcomingMatches(t *testing.T) {
 		away2   = types.NewMatchTeam("Croatia", 1)
 	)
 	{
-		fixtures.AddMatch(store, time.Now(), munLoc, home1, away1, types.LIVE)
-		fixtures.AddMatch(store, time.Now(), franLoc, home2, away2, types.LIVE)
+		fixtures.AddMatch(store, time.Now(), munLoc, home1, away1, types.LIVE, types.GROUPS)
+		fixtures.AddMatch(store, time.Now(), franLoc, home2, away2, types.LIVE, types.GROUPS)
 	}
 	ln, server := setupGRPCServer(t, store)
 	defer server.Stop()
@@ -142,7 +142,7 @@ func TestGetMatchesByTeam(t *testing.T) {
 		team  = "Germany"
 	)
 	{
-		newFinishedMatch(store, team, "Scotland")
+		newFinishedMatch(store, team, "Scotland", types.GROUPS)
 		newLiveMatch(store, team, "Hungary")
 		newNoStartedMatch(store, "Switzerland", team)
 		newNoStartedMatch(store, "Spain", "Italy")
@@ -170,7 +170,7 @@ func TestGetNoMatchesByTeam(t *testing.T) {
 		team  = "Portugal"
 	)
 	{
-		newFinishedMatch(store, "Germany", "Scotland")
+		newFinishedMatch(store, "Germany", "Scotland", types.GROUPS)
 		newLiveMatch(store, "Scotland", "Hungary")
 		newNoStartedMatch(store, "Switzerland", "Germany")
 		newNoStartedMatch(store, "Spain", "Italy")
@@ -186,4 +186,44 @@ func TestGetNoMatchesByTeam(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.Equal(t, 0, len(res))
+}
+
+func TestGetEuroWinner(t *testing.T) {
+	var (
+		store  = store.NewInMemoryStore()
+		winner = "germany"
+	)
+	newFinishedMatch(store, winner, "england", types.FINAL)
+
+	ln, server := setupGRPCServer(t, store)
+	defer server.Stop()
+
+	conn, client := setupGRPClient(t, ln)
+	defer conn.Close()
+
+	res, err := client.GetEuroWinner(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, res.Winner, winner)
+}
+
+func TestGetNoEuroWinner(t *testing.T) {
+	var (
+		store = store.NewInMemoryStore()
+	)
+	{
+		newFinishedMatch(store, "Germany", "Scotland", types.GROUPS)
+		newFinishedMatch(store, "Spain", "Italy", types.GROUPS)
+		newFinishedMatch(store, "France", "Austria", types.GROUPS)
+	}
+
+	ln, server := setupGRPCServer(t, store)
+	defer server.Stop()
+
+	conn, client := setupGRPClient(t, ln)
+	defer conn.Close()
+
+	res, _ := client.GetEuroWinner(context.Background())
+	assert.Nil(t, res)
 }

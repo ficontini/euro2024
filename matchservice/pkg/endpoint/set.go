@@ -16,6 +16,7 @@ type Set struct {
 	GetUpcomingMatchesEndpoint endpoint.Endpoint
 	GetLiveMatchesEndpoint     endpoint.Endpoint
 	GetMatchesByTeamEndpoint   endpoint.Endpoint
+	GetEuroWinnerEndpoint      endpoint.Endpoint
 }
 
 func (s Set) GetUpcomingMatches(ctx context.Context) ([]*types.Match, error) {
@@ -45,12 +46,22 @@ func (s Set) GetMatchesByTeam(ctx context.Context, team string) ([]*types.Match,
 	matches := NewMatchesFromMatchResponse(response)
 	return matches, nil
 }
+func (s Set) GetEuroWinner(ctx context.Context) (*types.Match, error) {
+	resp, err := s.GetEuroWinnerEndpoint(ctx, MatchRequest{})
+	if err != nil {
+		return nil, err
+	}
+	response := resp.(WinnerResponse)
+	match := NewMatchFromWinnerResponse(response)
+	return match, nil
+}
 
 func New(svc service.Service) Set {
 	var (
 		upcomingEndpoint endpoint.Endpoint
 		liveEndpoint     endpoint.Endpoint
 		teamEndpoint     endpoint.Endpoint
+		winnerEndpoint   endpoint.Endpoint
 	)
 	{
 		upcomingEndpoint = makeGetUpcomingMatchesEndpoint(svc)
@@ -59,11 +70,14 @@ func New(svc service.Service) Set {
 		liveEndpoint = circuitbreaker.Gobreaker(gobreaker.NewCircuitBreaker(gobreaker.Settings{}))(liveEndpoint)
 		teamEndpoint = makeGetMatchesByTeamEndpoint(svc)
 		teamEndpoint = circuitbreaker.Gobreaker(gobreaker.NewCircuitBreaker(gobreaker.Settings{}))(teamEndpoint)
+		winnerEndpoint = makeGetEuroWinnerEndpoint(svc)
+		winnerEndpoint = circuitbreaker.Gobreaker(gobreaker.NewCircuitBreaker(gobreaker.Settings{}))(winnerEndpoint)
 	}
 	return Set{
 		GetUpcomingMatchesEndpoint: upcomingEndpoint,
 		GetLiveMatchesEndpoint:     liveEndpoint,
 		GetMatchesByTeamEndpoint:   teamEndpoint,
+		GetEuroWinnerEndpoint:      winnerEndpoint,
 	}
 }
 func makeGetLiveMatchesEndpoint(svc service.Service) endpoint.Endpoint {
@@ -98,6 +112,16 @@ func makeGetMatchesByTeamEndpoint(svc service.Service) endpoint.Endpoint {
 		return response, nil
 	}
 }
+func makeGetEuroWinnerEndpoint(svc service.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		match, err := svc.GetEuroWinner(ctx)
+		if err != nil {
+			return nil, err
+		}
+		response := makeWinnerResponse(match)
+		return response, nil
+	}
+}
 
 type MatchRequest struct{}
 
@@ -113,6 +137,7 @@ type Match struct {
 	Date     time.Time         `json:"date"`
 	Status   types.MatchStatus `json:"-"`
 	Location Location          `json:"location"`
+	Round    types.RoundStatus `json:"round"`
 }
 
 type Location struct {
@@ -123,4 +148,8 @@ type Location struct {
 type Team struct {
 	Team  string `json:"team"`
 	Goals int    `json:"goals"`
+}
+type WinnerResponse struct {
+	Team  string `json:"team"`
+	Final Match  `json:"finalMatch"`
 }
