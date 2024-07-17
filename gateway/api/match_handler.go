@@ -46,3 +46,10 @@ func (h *MatchHandler) HandleGetMatchesByTeam(c *fiber.Ctx) error {
 	}
 	return c.JSON(matches)
 }
+func (h *MatchHandler) HandleGetWinner(c *fiber.Ctx) error {
+	res, err := h.svc.GetEuroWinner(c.Context())
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}

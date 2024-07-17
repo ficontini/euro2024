@@ -14,7 +14,7 @@ type Service interface {
 	GetUpcomingMatches(context.Context) ([]*types.Match, error)
 	GetLiveMatches(context.Context) ([]*types.Match, error)
 	GetMatchesByTeam(context.Context, string) ([]*types.Match, error)
-	GetEuroWinner(context.Context) (*types.Match, error)
+	GetEuroWinner(context.Context) (*types.Winner, error)
 }
 
 type basicService struct {
@@ -75,7 +75,7 @@ func (svc *basicService) GetMatchesByTeam(ctx context.Context, team string) ([]*
 	return svc.store.GetMatchesByTeam(ctx, team)
 }
 
-func (svc *basicService) GetEuroWinner(ctx context.Context) (*types.Match, error) {
+func (svc *basicService) GetEuroWinner(ctx context.Context) (*types.Winner, error) {
 	matches, err := svc.store.GetMatchesByRound(ctx, types.FINAL)
 	if err != nil {
 		return nil, err
@@ -83,5 +83,9 @@ func (svc *basicService) GetEuroWinner(ctx context.Context) (*types.Match, error
 	if len(matches) == 0 {
 		return nil, fmt.Errorf("euro winner not found")
 	}
-	return matches[0], nil
+	match := matches[0]
+	return &types.Winner{
+		Team:       match.Winner,
+		FinalMatch: match,
+	}, nil
 }

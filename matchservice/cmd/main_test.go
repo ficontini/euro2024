@@ -205,7 +205,7 @@ func TestGetEuroWinner(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, res.Winner, winner)
+	assert.Equal(t, res.Team, winner)
 }
 
 func TestGetNoEuroWinner(t *testing.T) {

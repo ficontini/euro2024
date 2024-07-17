@@ -46,14 +46,14 @@ func (s Set) GetMatchesByTeam(ctx context.Context, team string) ([]*types.Match,
 	matches := NewMatchesFromMatchResponse(response)
 	return matches, nil
 }
-func (s Set) GetEuroWinner(ctx context.Context) (*types.Match, error) {
+func (s Set) GetEuroWinner(ctx context.Context) (*types.Winner, error) {
 	resp, err := s.GetEuroWinnerEndpoint(ctx, MatchRequest{})
 	if err != nil {
 		return nil, err
 	}
 	response := resp.(WinnerResponse)
-	match := NewMatchFromWinnerResponse(response)
-	return match, nil
+	winner := NewWinnerFromWinnerResponse(response)
+	return winner, nil
 }
 
 func New(svc service.Service) Set {
@@ -114,11 +114,11 @@ func makeGetMatchesByTeamEndpoint(svc service.Service) endpoint.Endpoint {
 }
 func makeGetEuroWinnerEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		match, err := svc.GetEuroWinner(ctx)
+		winner, err := svc.GetEuroWinner(ctx)
 		if err != nil {
 			return nil, err
 		}
-		response := makeWinnerResponse(match)
+		response := makeWinnerResponse(winner)
 		return response, nil
 	}
 }

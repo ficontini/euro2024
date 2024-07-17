@@ -87,15 +87,18 @@ func NewMatchesFromMatchResponse(response MatchResponse) []*types.Match {
 	}
 	return matches
 }
-func NewMatchFromWinnerResponse(res WinnerResponse) *types.Match {
-	return &types.Match{
-		Date:     res.Final.Date,
-		Location: types.NewLocation(res.Final.Location.City, res.Final.Location.Stadium),
-		Home:     types.NewMatchTeam(res.Final.Home.Team, res.Final.Home.Goals),
-		Away:     types.NewMatchTeam(res.Final.Away.Team, res.Final.Away.Goals),
-		Status:   res.Final.Status,
-		Round:    res.Final.Round,
-		Winner:   res.Team,
+func NewWinnerFromWinnerResponse(res WinnerResponse) *types.Winner {
+	return &types.Winner{
+		Team: res.Team,
+		FinalMatch: &types.Match{
+			Date:     res.Final.Date,
+			Location: types.NewLocation(res.Final.Location.City, res.Final.Location.Stadium),
+			Home:     types.NewMatchTeam(res.Final.Home.Team, res.Final.Home.Goals),
+			Away:     types.NewMatchTeam(res.Final.Away.Team, res.Final.Away.Goals),
+			Status:   res.Final.Status,
+			Round:    res.Final.Round,
+			Winner:   res.Team,
+		},
 	}
 }
 func makeResponse(matches []*types.Match) MatchResponse {
@@ -123,25 +126,25 @@ func makeResponse(matches []*types.Match) MatchResponse {
 		Matches: response,
 	}
 }
-func makeWinnerResponse(match *types.Match) WinnerResponse {
+func makeWinnerResponse(w *types.Winner) WinnerResponse {
 	return WinnerResponse{
-		Team: match.Winner,
+		Team: w.Team,
 		Final: Match{
-			Date: match.Date,
+			Date: w.FinalMatch.Date,
 			Location: Location{
-				match.Location.City,
-				match.Location.Stadium,
+				w.FinalMatch.Location.City,
+				w.FinalMatch.Location.Stadium,
 			},
-			Status: match.Status,
+			Status: w.FinalMatch.Status,
 			Home: Team{
-				Team:  match.Home.Name,
-				Goals: match.Home.Goals,
+				Team:  w.FinalMatch.Home.Name,
+				Goals: w.FinalMatch.Home.Goals,
 			},
 			Away: Team{
-				Team:  match.Away.Name,
-				Goals: match.Away.Goals,
+				Team:  w.FinalMatch.Away.Name,
+				Goals: w.FinalMatch.Away.Goals,
 			},
-			Round: match.Round,
+			Round: w.FinalMatch.Round,
 		},
 	}
 }

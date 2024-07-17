@@ -79,3 +79,8 @@ func getWinner(home, away *MatchTeam) string {
 	}
 	return away.Name
 }
+
+type Winner struct {
+	Team       string `json:"team"`
+	FinalMatch *Match `json:"finalMatch"`
+}

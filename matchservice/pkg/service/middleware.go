@@ -59,14 +59,14 @@ func (m *LogMiddleware) GetMatchesByTeam(ctx context.Context, team string) (matc
 	matches, err = m.next.GetMatchesByTeam(ctx, team)
 	return matches, err
 }
-func (m *LogMiddleware) GetEuroWinner(ctx context.Context) (match *types.Match, err error) {
+func (m *LogMiddleware) GetEuroWinner(ctx context.Context) (w *types.Winner, err error) {
 	defer func() {
 		var winner string
-		if match != nil {
-			winner = match.Winner
+		if w != nil {
+			winner = w.Team
 		}
 		m.logger.Log("method", "GetEuroWinner", "winner", winner, "err", err)
 	}()
-	match, err = m.next.GetEuroWinner(ctx)
-	return match, err
+	w, err = m.next.GetEuroWinner(ctx)
+	return w, err
 }
