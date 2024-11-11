@@ -8,8 +8,6 @@ Euro2024 is a microservice-based application developed in Go that provides real-
   - [Accessing the endpoints](#acessing-the-endpoints)
   - [Example request](#example-request)
 
-## Architecture diagram
-![Diagram](assets/diagram.png)
 ## Usage
 ### Accessing the endpoints
 * Once all services are running, you can access the match data through the `gateway` service.
